@@ -1,7 +1,5 @@
-cookieEnd =  ' path=/; max-age=3600'
-document.cookie = 'name=device-information;' + cookieEnd;
-
 /* function for setting cookies*/
+
 function setCookie(name,value,days) {
     var expires = "";
     if (days) {
@@ -21,6 +19,7 @@ function userID() {
 }
 
 /* function for getting cookie value, returns null if none set for a name*/ 
+
 function getCookie(name) {
     var nameEQ = name + "=";
     var ca = document.cookie.split(';');
@@ -33,6 +32,7 @@ function getCookie(name) {
 }
 
 /* function for checking if user-id is set, and if not sets it*/
+
 function checkCookieUserID() {
     let id = getCookie('user-id');
     if (id == null) {
@@ -41,10 +41,12 @@ function checkCookieUserID() {
 }
 
 checkCookieUserID();
-console.log(document.cookie);
+
+
 
 /* Get user location */
-let lat = "";
+
+/* let lat = "";
 let lon = "";
 function getLocation() {
 	if (navigator.geolocation) {
@@ -60,7 +62,8 @@ function getPosition(position) {
 	lon = position.coords.longitude;
 }
 
-getLocation();
+getLocation(); */
+
 /* code if successful */
 /* Update not working due to functions running last on load) */
 /*
