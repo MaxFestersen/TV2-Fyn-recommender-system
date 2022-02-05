@@ -46,7 +46,7 @@ function checkCookieUserID() {
             var screenHeight = screen.height;
             if(deviceID != "" && firstVisit != "" && screenWidth != "" && screenHeight != ""){
                 $.ajax({
-                    url: "/php/save.php",
+                    url: "/php/device.php",
                     type: "POST",
                     data: {
                         deviceID: deviceID,
@@ -66,13 +66,41 @@ function checkCookieUserID() {
 
 checkCookieUserID();
 
-/* some variables for session db
-var deviceID = getCookie('user-id');
-var date = new Date().toISOString().split('T')[0];
-var elapsed = some kind of timer
-var articleID = document.head.querySelector("[property='bazo:id'][content]").content;
-*/
+let startDate = new Date();
+let elapsedTime = 0; // need some way to track earlier page visits, so it doesn't reset at page reload
 
+document.addEventListener('visibilitychange', function(){
+    if (document.visibilityState === 'visible') {
+        startDate = new Date();
+    }else{
+        const endDate = new Date();
+        const spentTime = endDate.getTime() - startDate.getTime();
+        elapsedTime += spentTime;
+
+        const deviceID = getCookie('user-id');
+        const date = new Date().toISOString().split('T')[0];
+        const elapsed = elapsedTime/1000;
+        const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
+        const scrollY = 10; // need to find a way to save the furthest scroll
+        if(deviceID != "" && date != "" && elapsed != "" && articleID != "" && scrollY != ""){
+            $.ajax({
+                url: "/php/session.php",
+                type: "POST",
+                data: {
+                    deviceID: deviceID,
+                    date: date,
+                    elapsed: elapsed,
+                    articleID: articleID,
+                    scrollY: scrollY
+                },
+                cache: false,
+                success: function(){
+                    console.log(deviceID, date, elapsed, articleID, scrollY);
+                }
+            })
+        }
+    }
+});
 
 /* Get user location */
 
