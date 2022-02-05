@@ -4,9 +4,8 @@ $deviceID=$_POST['deviceID'];
 $firstVisit=$_POST['firstVisit'];
 $screenWidth=$_POST['screenWidth'];
 $screenHeight=$_POST['screenHeight'];
-$sql = "INSERT INTO device(deviceID, firstVisit, screenWidth, screenHeight)
-VALUES ('$deviceID', '$firstVisit', '$screenWidth', '$screenHeight')";
-$conn->query($sql);
+$sql = "INSERT INTO `device`(`deviceID`, `firstVisit`, `screenWidth`, `screenHeight`)
+VALUES ('{$deviceID}', '{$firstVisit}', '{$screenWidth}', '{$screenHeight}');";
 if ($conn->query($sql) === TRUE) {
   echo "New record created successfully";
   } else {

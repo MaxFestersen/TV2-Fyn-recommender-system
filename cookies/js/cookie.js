@@ -40,7 +40,7 @@ function checkCookieUserID() {
 
         $(document).ready(function(){
             var deviceID = Cookies.get('user-id');
-            var firstVisit = new Date;
+            var firstVisit = new Date().toISOString().split('T')[0];
             var screenWidth = screen.width;
             var screenHeight = screen.height;
             if(deviceID != "" && firstVisit != "" && screenWidth != "" && screenHeight != ""){
