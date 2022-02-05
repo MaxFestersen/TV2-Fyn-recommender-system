@@ -10,7 +10,8 @@ PRIMARY KEY (deviceID)
 
 CREATE TABLE IF NOT EXISTS tv2fyn.session(
 deviceID varchar(255) NOT NULL,
-Time timestamp,
+date DATE,
+elapsed time,
 articleID varchar(255) NOT NULL,
 scrollY	varchar(255),
 PRIMARY KEY (articleID),

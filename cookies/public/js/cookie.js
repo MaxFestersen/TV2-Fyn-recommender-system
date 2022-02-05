@@ -32,14 +32,15 @@ function getCookie(name) {
 }
 
 /* function for checking if user-id is set, and if not sets it*/
+let daysToExpire = 30; // number of days before cookie expires
 
 function checkCookieUserID() {
     let id = getCookie('user-id');
     if (id == null) {
-        setCookie("user-id",userID(),30);
+        setCookie("user-id", userID(), daysToExpire);
 
         $(document).ready(function(){
-            var deviceID = Cookies.get('user-id');
+            var deviceID = getCookie('user-id');
             var firstVisit = new Date().toISOString().split('T')[0];
             var screenWidth = screen.width;
             var screenHeight = screen.height;
@@ -65,7 +66,13 @@ function checkCookieUserID() {
 
 checkCookieUserID();
 
-console.log(new Date);
+/* some variables for session db
+var deviceID = getCookie('user-id');
+var date = new Date().toISOString().split('T')[0];
+var elapsed = some kind of timer
+var articleID = document.head.querySelector("[property='bazo:id'][content]").content;
+*/
+
 
 /* Get user location */
 
