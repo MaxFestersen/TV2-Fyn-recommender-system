@@ -45,7 +45,7 @@ function checkCookieUserID() {
             var screenHeight = screen.height;
             if(deviceID != "" && firstVisit != "" && screenWidth != "" && screenHeight != ""){
                 $.ajax({
-                    url: "php/save.php",
+                    url: "/php/save.php",
                     type: "POST",
                     data: {
                         deviceID: deviceID,

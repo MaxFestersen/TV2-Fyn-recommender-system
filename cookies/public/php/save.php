@@ -1,5 +1,5 @@
 <?php
-include 'database.php';
+include '../../config/database.php';
 $deviceID=$_POST['deviceID'];
 $firstVisit=$_POST['firstVisit'];
 $screenWidth=$_POST['screenWidth'];
