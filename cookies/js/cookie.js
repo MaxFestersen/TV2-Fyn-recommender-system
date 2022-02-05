@@ -37,12 +37,35 @@ function checkCookieUserID() {
     let id = getCookie('user-id');
     if (id == null) {
         setCookie("user-id",userID(),30);
+
+        $(document).ready(function(){
+            var deviceID = Cookies.get('user-id');
+            var firstVisit = new Date;
+            var screenWidth = screen.width;
+            var screenHeight = screen.height;
+            if(deviceID != "" && firstVisit != "" && screenWidth != "" && screenHeight != ""){
+                $.ajax({
+                    url: "php/save.php",
+                    type: "POST",
+                    data: {
+                        deviceID: deviceID,
+                        firstVisit: firstVisit,
+                        screenWidth: screenWidth,
+                        screenHeight: screenHeight
+                    },
+                    cache: false,
+                    success: function(){
+                        console.log(deviceID, firstVisit, screenHeight, screenWidth);
+                    }
+                })
+            }
+        })
     }
 }
 
 checkCookieUserID();
 
-
+console.log(new Date);
 
 /* Get user location */
 
