@@ -104,6 +104,18 @@ function checkCookieUserID() {
 
 checkCookieUserID();
 
+function scrollPercentage() {
+    var scrollPercentage = (((document.documentElement.scrollTop + document.body.scrollTop) / (document.documentElement.scrollHeight - document.documentElement.clientHeight) || 0) * 100);
+    return scrollPercentage;
+}
+
+let maxScroll = 0;
+document.addEventListener('scroll', function() {
+    if(scrollPercentage() > maxScroll){
+        maxScroll = scrollPercentage();
+    }
+});
+
 let startDate = new Date();
 let elapsedTime = 0; // need some way to track earlier page visits, so it doesn't reset at page reload
 
@@ -119,7 +131,7 @@ document.addEventListener('visibilitychange', function(){
         const date = new Date().toISOString().split('T')[0];
         const elapsed = elapsedTime/1000;
         const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
-        const scrollY = 10; // need to find a way to save the furthest scroll
+        const scrollY = maxScroll;
         if(sessionID != "" && date != "" && elapsed != "" && articleID != "" && scrollY != ""){
             $.ajax({
                 url: "php/session.php",
