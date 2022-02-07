@@ -40,7 +40,6 @@ function checkCookieUserID() {
     if (uID == null) {
         setCookie("user-id", userID(), daysToExpire);
         setCookie("session-id", userID() + "-s");
-
         $(document).ready(function(){
             var deviceID = getCookie('user-id');
             var sessionID = getCookie('session-id');
@@ -49,7 +48,7 @@ function checkCookieUserID() {
             var screenHeight = screen.height;
             if(deviceID != "" && firstVisit != "" && screenWidth != "" && screenHeight != "" && sessionID != ""){
                 $.ajax({
-                    url: "/php/device.php",
+                    url: "php/device.php",
                     type: "POST",
                     data: {
                         deviceID: deviceID,
@@ -119,7 +118,7 @@ document.addEventListener('visibilitychange', function(){
         const scrollY = 10; // need to find a way to save the furthest scroll
         if(sessionID != "" && date != "" && elapsed != "" && articleID != "" && scrollY != ""){
             $.ajax({
-                url: "/php/session.php",
+                url: "php/session.php",
                 type: "POST",
                 data: {
                     sessionID: sessionID,
