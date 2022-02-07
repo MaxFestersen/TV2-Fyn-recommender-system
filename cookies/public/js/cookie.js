@@ -145,7 +145,7 @@ document.addEventListener('visibilitychange', async function(){
 });
 
 function saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon){
-	if(sessionID != "" && date != "" && elapsed != "" && articleID != "" && scrollY != ""){
+	if(sessionID != "" && date != "" && elapsed != "" && articleID != ""){
 		$.ajax({
 			url: "php/session.php",
 			type: "POST",
