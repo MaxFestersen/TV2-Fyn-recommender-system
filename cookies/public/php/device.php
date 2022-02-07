@@ -1,5 +1,7 @@
 <?php
-include '../../config/database.php';
+$path = $_SERVER['DOCUMENT_ROOT'];
+$path .= "/config/tv2RSdatabase.php";
+include $path;
 $deviceID=$_POST['deviceID'];
 $firstVisit=$_POST['firstVisit'];
 $screenWidth=$_POST['screenWidth'];
