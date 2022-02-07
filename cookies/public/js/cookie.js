@@ -108,7 +108,7 @@ function scrollPercentage() {
 let maxScroll = 0;
 document.addEventListener('scroll', function() {
    if(scrollPercentage() > maxScroll){
-        maxScroll = scrollPercentage();
+        maxScroll = Math.round(scrollPercentage());
     }
 });
 
