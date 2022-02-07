@@ -111,7 +111,7 @@ function scrollPercentage() {
 
 let maxScroll = 0;
 document.addEventListener('scroll', function() {
-    if(scrollPercentage() > maxScroll){
+   if(scrollPercentage() > maxScroll){
         maxScroll = scrollPercentage();
     }
 });
@@ -132,7 +132,7 @@ document.addEventListener('visibilitychange', function(){
         const elapsed = elapsedTime/1000;
         const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
         const scrollY = maxScroll;
-        if(sessionID != "" && date != "" && elapsed != "" && articleID != "" && scrollY != ""){
+        if(sessionID != "" && date != "" && elapsed != "" && articleID != ""){
             $.ajax({
                 url: "php/session.php",
                 type: "POST",
