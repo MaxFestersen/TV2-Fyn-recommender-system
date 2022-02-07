@@ -14,6 +14,8 @@ date DATE,
 elapsed time,
 articleID varchar(255) NOT NULL,
 scrollY	varchar(255),
+lat FLOAT(6,3),
+lon FLOAT(6,3),
 PRIMARY KEY (articleID),
 FOREIGN KEY (deviceID) REFERENCES device(deviceID)
 );
