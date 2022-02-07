@@ -1,7 +1,5 @@
 <?php
-$path = $_SERVER['DOCUMENT_ROOT'];
-$path .= "/config/tv2RSdatabase.php";
-include $path;
+include '../../config/database.php';
 $deviceID=$_POST['deviceID'];
 $date=$_POST['date'];
 $elapsed=$_POST['elapsed'];
