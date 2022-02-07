@@ -62,7 +62,7 @@ function checkCookieUserID() {
                     success: function(){
                         console.log(deviceID, firstVisit, screenHeight, screenWidth);
                         $.ajax({
-                            url: "/php/device_session.php",
+                            url: "php/device_session.php",
                             type: "POST",
                             data: {
                                 deviceID: deviceID,
@@ -111,7 +111,7 @@ function scrollPercentage() {
 
 let maxScroll = 0;
 document.addEventListener('scroll', function() {
-    if(scrollPercentage() > maxScroll){
+   if(scrollPercentage() > maxScroll){
         maxScroll = scrollPercentage();
     }
 });
@@ -171,6 +171,10 @@ function saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon){
 }
 
 /* Get user location */
+/* Inspiration
+	- https://www.w3schools.com/html/html5_geolocation.asp
+	- https://tutorialmeta.com/question/javascript-pass-geolocation-as-string-variable
+*/
 function getLocation() {
 	// Promise reults or serve rejection
     return new Promise((resolve, reject) => {
