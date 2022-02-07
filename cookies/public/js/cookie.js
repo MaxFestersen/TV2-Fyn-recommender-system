@@ -68,10 +68,10 @@ checkCookieUserID();
 let startDate = new Date();
 let elapsedTime = 0; // need some way to track earlier page visits, so it doesn't reset at page reload
 
-document.addEventListener('visibilitychange', function(){
+document.addEventListener('visibilitychange', async function(){
     if (document.visibilityState === 'visible') {
         startDate = new Date();
-    }else{
+    } else{
         const endDate = new Date();
         const spentTime = endDate.getTime() - startDate.getTime();
         elapsedTime += spentTime;
@@ -81,52 +81,57 @@ document.addEventListener('visibilitychange', function(){
         const elapsed = elapsedTime/1000;
         const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
         const scrollY = 10; // need to find a way to save the furthest scroll
-        if(deviceID != "" && date != "" && elapsed != "" && articleID != "" && scrollY != ""){
-            $.ajax({
-                url: "php/session.php",
-                type: "POST",
-                data: {
-                    deviceID: deviceID,
-                    date: date,
-                    elapsed: elapsed,
-                    articleID: articleID,
-                    scrollY: scrollY
-                },
-                cache: false,
-                success: function(){
-                    console.log(deviceID, date, elapsed, articleID, scrollY);
-                }
-            })
-        }
+		
+		(async function() {
+			pos = await getLocation();
+		})().then(() => {
+			// If succes
+			let lat = pos.coords.latitude.toFixed(3); // Get latitude and generalise position
+			let lon = pos.coords.longitude.toFixed(3); // Get longitude and generalise position
+			saveSession(deviceID, date, elapsed, articleID, scrollY, lat, lon);
+		}).catch((err) => {
+			// If failed
+			console.error(err);
+			saveSession(deviceID, date, elapsed, articleID, scrollY, null, null);
+		})
     }
 });
 
-/* Get user location */
-
-/* let lat = "";
-let lon = "";
-function getLocation() {
-	if (navigator.geolocation) {
-		navigator.geolocation.getCurrentPosition(getPosition);
-	} else {
-		lat = false;
-		lon = false;
+function saveSession(deviceID, date, elapsed, articleID, scrollY, lat, lon){
+	if(deviceID != "" && date != "" && elapsed != "" && articleID != "" && scrollY != ""){
+		$.ajax({
+			url: "php/session.php",
+			type: "POST",
+			data: {
+				deviceID: deviceID,
+				date: date,
+				elapsed: elapsed,
+				articleID: articleID,
+				scrollY: scrollY,
+				lat: lat,
+				lon: lon
+			},
+			cache: false,
+			success: function(){
+				console.log(deviceID, date, elapsed, articleID, scrollY, lat, lon);
+			}
+		})
 	}
 }
 
-function getPosition(position) {
-	lat = position.coords.latitude;
-	lon = position.coords.longitude;
+/* Get user location */
+function getLocation() {
+	// Promise reults or serve rejection
+    return new Promise((resolve, reject) => {
+		// Check if geolocation is available
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                return resolve(position);
+            }, function(err) {
+                return reject(err);
+            });
+        } else {
+            return reject("Geolocation is not supported by this browser.");
+        }
+    })
 }
-
-getLocation(); */
-
-/* code if successful */
-/* Update not working due to functions running last on load) */
-/*
-latString = 'lat=' + lat + ';';
-lonString = 'lon=' + lon + ';';
-document.cookie = latString + cookieEnd;
-document.cookie = lonString + cookieEnd;
-console.log(document.cookie);
-*/
