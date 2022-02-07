@@ -1,14 +1,14 @@
 <?php
 include '../../config/database.php';
-$deviceID=$_POST['deviceID'];
+$sessionID=$_POST['sessionID'];
 $date=$_POST['date'];
 $elapsed=$_POST['elapsed'];
 $articleID=$_POST['articleID'];
 $scrollY=$_POST['scrollY'];
-$sql = "INSERT INTO `session`(`deviceID`, `date`, `elapsed`, `articleID`, `scrollY`)
-VALUES ('{$deviceID}', '{$date}', '{$elapsed}', '{$articleID}', '{$scrollY}')
+$sql = "INSERT INTO `session`(`sessionID`, `date`, `elapsed`, `articleID`, `scrollY`)
+VALUES ('{$sessionID}', '{$date}', '{$elapsed}', '{$articleID}', '{$scrollY}')
 ON DUPLICATE KEY UPDATE
-`deviceID`='{$deviceID}', `date`='{$date}', `elapsed`='{$elapsed}', `articleID`='{$articleID}', `scrollY`='{$scrollY}';";
+`sessionID`='{$sessionID}', `date`='{$date}', `elapsed`='{$elapsed}', `articleID`='{$articleID}', `scrollY`='{$scrollY}';";
 if ($conn->query($sql) === TRUE) {
   echo "New record created successfully";
   } else {
