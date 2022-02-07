@@ -36,14 +36,12 @@ let daysToExpire = 30; // number of days before cookie expires
 
 function checkCookieUserID() {
     let uID = getCookie('user-id');
-    let sID = getCookie('session-id');
+    let sID = sessionStorage.getItem('session-id');
     if (uID == null) {
         setCookie("user-id", userID(), daysToExpire);
-        //setCookie("session-id", userID() + "-s");
         sessionStorage.setItem("session-id", userID() + "-s");
         $(document).ready(function(){
             var deviceID = getCookie('user-id');
-            //var sessionID = getCookie('session-id');
             var sessionID = sessionStorage.getItem("session-id");
             var firstVisit = new Date().toISOString().split('T')[0];
             var screenWidth = screen.width;
@@ -78,11 +76,9 @@ function checkCookieUserID() {
             }
         })
     }else if (sID == null){
-        //setCookie("session-id", userID() + "-s");
         sessionStorage.setItem("session-id", userID() + "-s");
         $(document).ready(function(){
             var deviceID = getCookie('user-id');
-            //var sessionID = getCookie('session-id');
             var sessionID = sessionStorage.getItem("session-id");
             if(deviceID != "" && sessionID != ""){
                 $.ajax({
