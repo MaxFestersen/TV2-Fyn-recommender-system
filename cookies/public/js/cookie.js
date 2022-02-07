@@ -60,7 +60,7 @@ function checkCookieUserID() {
                     success: function(){
                         console.log(deviceID, firstVisit, screenHeight, screenWidth);
                         $.ajax({
-                            url: "/php/device_session.php",
+                            url: "php/device_session.php",
                             type: "POST",
                             data: {
                                 deviceID: deviceID,
@@ -82,7 +82,7 @@ function checkCookieUserID() {
             var sessionID = sessionStorage.getItem("session-id");
             if(deviceID != "" && sessionID != ""){
                 $.ajax({
-                    url: "/php/device_session.php",
+                    url: "php/device_session.php",
                     type: "POST",
                     data: {
                         deviceID: deviceID,
@@ -115,10 +115,10 @@ document.addEventListener('scroll', function() {
 let startDate = new Date();
 let elapsedTime = 0; // need some way to track earlier page visits, so it doesn't reset at page reload
 
-document.addEventListener('visibilitychange', function(){
+document.addEventListener('visibilitychange', async function(){
     if (document.visibilityState === 'visible') {
         startDate = new Date();
-    }else{
+    } else{
         const endDate = new Date();
         const spentTime = endDate.getTime() - startDate.getTime();
         elapsedTime += spentTime;
@@ -128,52 +128,61 @@ document.addEventListener('visibilitychange', function(){
         const elapsed = elapsedTime/1000;
         const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
         const scrollY = maxScroll;
-        if(sessionID != "" && date != "" && elapsed != "" && articleID != ""){
-            $.ajax({
-                url: "php/session.php",
-                type: "POST",
-                data: {
-                    sessionID: sessionID,
-                    date: date,
-                    elapsed: elapsed,
-                    articleID: articleID,
-                    scrollY: scrollY
-                },
-                cache: false,
-                success: function(){
-                    console.log(sessionID, date, elapsed, articleID, scrollY);
-                }
-            })
-        }
+		
+		(async function() {
+			pos = await getLocation();
+		})().then(() => {
+			// If succes
+			let lat = pos.coords.latitude.toFixed(3); // Get latitude and generalise position
+			let lon = pos.coords.longitude.toFixed(3); // Get longitude and generalise position
+			saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon);
+		}).catch((err) => {
+			// If failed
+			console.error(err);
+			saveSession(sessionID, date, elapsed, articleID, scrollY, null, null);
+		})
     }
 });
 
-/* Get user location */
-
-/* let lat = "";
-let lon = "";
-function getLocation() {
-	if (navigator.geolocation) {
-		navigator.geolocation.getCurrentPosition(getPosition);
-	} else {
-		lat = false;
-		lon = false;
+function saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon){
+	if(sessionID != "" && date != "" && elapsed != "" && articleID != "" && scrollY != ""){
+		$.ajax({
+			url: "php/session.php",
+			type: "POST",
+			data: {
+				sessionID: sessionID,
+				date: date,
+				elapsed: elapsed,
+				articleID: articleID,
+				scrollY: scrollY,
+				lat: lat,
+				lon: lon
+			},
+			cache: false,
+			success: function(){
+				console.log(sessionID, date, elapsed, articleID, scrollY, lat, lon);
+			}
+		})
 	}
 }
 
-function getPosition(position) {
-	lat = position.coords.latitude;
-	lon = position.coords.longitude;
-}
-
-getLocation(); */
-
-/* code if successful */
-/* Update not working due to functions running last on load) */
-/*
-latString = 'lat=' + lat + ';';
-lonString = 'lon=' + lon + ';';
-document.cookie = latString + cookieEnd;
-document.cookie = lonString + cookieEnd;
-console.log(document.cookie);
+/* Get user location */
+/* Inspiration
+	- https://www.w3schools.com/html/html5_geolocation.asp
+	- https://tutorialmeta.com/question/javascript-pass-geolocation-as-string-variable
 */
+function getLocation() {
+	// Promise reults or serve rejection
+    return new Promise((resolve, reject) => {
+		// Check if geolocation is available
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                return resolve(position);
+            }, function(err) {
+                return reject(err);
+            });
+        } else {
+            return reject("Geolocation is not supported by this browser.");
+        }
+    })
+}
