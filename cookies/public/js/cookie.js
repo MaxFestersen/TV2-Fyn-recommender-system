@@ -35,15 +35,20 @@ function getCookie(name) {
 let daysToExpire = 30; // number of days before cookie expires
 
 function checkCookieUserID() {
-    let id = getCookie('user-id');
-    if (id == null) {
+    let uID = getCookie('user-id');
+    let sID = getCookie('session-id');
+    if (uID == null) {
         setCookie("user-id", userID(), daysToExpire);
+        //setCookie("session-id", userID() + "-s");
+        sessionStorage.setItem("session-id", userID() + "-s");
         $(document).ready(function(){
             var deviceID = getCookie('user-id');
+            //var sessionID = getCookie('session-id');
+            var sessionID = sessionStorage.getItem("session-id");
             var firstVisit = new Date().toISOString().split('T')[0];
             var screenWidth = screen.width;
             var screenHeight = screen.height;
-            if(deviceID != "" && firstVisit != "" && screenWidth != "" && screenHeight != ""){
+            if(deviceID != "" && firstVisit != "" && screenWidth != "" && screenHeight != "" && sessionID != ""){
                 $.ajax({
                     url: "php/device.php",
                     type: "POST",
@@ -56,6 +61,40 @@ function checkCookieUserID() {
                     cache: false,
                     success: function(){
                         console.log(deviceID, firstVisit, screenHeight, screenWidth);
+                        $.ajax({
+                            url: "/php/device_session.php",
+                            type: "POST",
+                            data: {
+                                deviceID: deviceID,
+                                sessionID: sessionID
+                            },
+                            cache: false,
+                            succes: function(){
+                                console.log(deviceID, sessionID);
+                            }
+                        })
+                    }
+                })
+            }
+        })
+    }else if (sID == null){
+        //setCookie("session-id", userID() + "-s");
+        sessionStorage.setItem("session-id", userID() + "-s");
+        $(document).ready(function(){
+            var deviceID = getCookie('user-id');
+            //var sessionID = getCookie('session-id');
+            var sessionID = sessionStorage.getItem("session-id");
+            if(deviceID != "" && sessionID != ""){
+                $.ajax({
+                    url: "php/device_session.php",
+                    type: "POST",
+                    data: {
+                        deviceID: deviceID,
+                        sessionID: sessionID
+                    },
+                    cache: false,
+                    succes: function(){
+                        console.log(deviceID, sessionID);
                     }
                 })
             }
@@ -64,6 +103,18 @@ function checkCookieUserID() {
 }
 
 checkCookieUserID();
+
+function scrollPercentage() {
+    var scrollPercentage = (((document.documentElement.scrollTop + document.body.scrollTop) / (document.documentElement.scrollHeight - document.documentElement.clientHeight) || 0) * 100);
+    return scrollPercentage;
+}
+
+let maxScroll = 0;
+document.addEventListener('scroll', function() {
+    if(scrollPercentage() > maxScroll){
+        maxScroll = scrollPercentage();
+    }
+});
 
 let startDate = new Date();
 let elapsedTime = 0; // need some way to track earlier page visits, so it doesn't reset at page reload
@@ -76,11 +127,11 @@ document.addEventListener('visibilitychange', async function(){
         const spentTime = endDate.getTime() - startDate.getTime();
         elapsedTime += spentTime;
 
-        const deviceID = getCookie('user-id');
+        const sessionID = sessionStorage.getItem("session-id");
         const date = new Date().toISOString().split('T')[0];
         const elapsed = elapsedTime/1000;
         const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
-        const scrollY = 10; // need to find a way to save the furthest scroll
+        const scrollY = maxScroll;
 		
 		(async function() {
 			pos = await getLocation();
@@ -88,22 +139,22 @@ document.addEventListener('visibilitychange', async function(){
 			// If succes
 			let lat = pos.coords.latitude.toFixed(3); // Get latitude and generalise position
 			let lon = pos.coords.longitude.toFixed(3); // Get longitude and generalise position
-			saveSession(deviceID, date, elapsed, articleID, scrollY, lat, lon);
+			saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon);
 		}).catch((err) => {
 			// If failed
 			console.error(err);
-			saveSession(deviceID, date, elapsed, articleID, scrollY, null, null);
+			saveSession(sessionID, date, elapsed, articleID, scrollY, null, null);
 		})
     }
 });
 
-function saveSession(deviceID, date, elapsed, articleID, scrollY, lat, lon){
-	if(deviceID != "" && date != "" && elapsed != "" && articleID != "" && scrollY != ""){
+function saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon){
+	if(sessionID != "" && date != "" && elapsed != "" && articleID != "" && scrollY != ""){
 		$.ajax({
 			url: "php/session.php",
 			type: "POST",
 			data: {
-				deviceID: deviceID,
+				sessionID: sessionID,
 				date: date,
 				elapsed: elapsed,
 				articleID: articleID,
@@ -113,7 +164,7 @@ function saveSession(deviceID, date, elapsed, articleID, scrollY, lat, lon){
 			},
 			cache: false,
 			success: function(){
-				console.log(deviceID, date, elapsed, articleID, scrollY, lat, lon);
+				console.log(sessionID, date, elapsed, articleID, scrollY, lat, lon);
 			}
 		})
 	}
