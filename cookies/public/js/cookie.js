@@ -39,10 +39,12 @@ function checkCookieUserID() {
     let sID = getCookie('session-id');
     if (uID == null) {
         setCookie("user-id", userID(), daysToExpire);
-        setCookie("session-id", userID() + "-s");
+        //setCookie("session-id", userID() + "-s");
+        sessionStorage.setItem("session-id", userID() + "-s");
         $(document).ready(function(){
             var deviceID = getCookie('user-id');
-            var sessionID = getCookie('session-id');
+            //var sessionID = getCookie('session-id');
+            var sessionID = sessionStorage.getItem("session-id");
             var firstVisit = new Date().toISOString().split('T')[0];
             var screenWidth = screen.width;
             var screenHeight = screen.height;
@@ -76,10 +78,12 @@ function checkCookieUserID() {
             }
         })
     }else if (sID == null){
-        setCookie("session-id", userID() + "-s");
+        //setCookie("session-id", userID() + "-s");
+        sessionStorage.setItem("session-id", userID() + "-s");
         $(document).ready(function(){
             var deviceID = getCookie('user-id');
-            var sessionID = getCookie('session-id');
+            //var sessionID = getCookie('session-id');
+            var sessionID = sessionStorage.getItem("session-id");
             if(deviceID != "" && sessionID != ""){
                 $.ajax({
                     url: "/php/device_session.php",
@@ -111,7 +115,7 @@ document.addEventListener('visibilitychange', function(){
         const spentTime = endDate.getTime() - startDate.getTime();
         elapsedTime += spentTime;
 
-        const sessionID = getCookie('session-id');
+        const sessionID = sessionStorage.getItem("session-id");
         const date = new Date().toISOString().split('T')[0];
         const elapsed = elapsedTime/1000;
         const articleID = document.head.querySelector("[property='bazo:id'][content]").content;

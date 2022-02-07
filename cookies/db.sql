@@ -21,7 +21,7 @@ date DATE,
 elapsed time,
 articleID varchar(255) NOT NULL,
 scrollY	varchar(255),
-PRIMARY KEY (articleID),
+PRIMARY KEY (sessionID, articleID),
 FOREIGN KEY (sessionID) REFERENCES device_session(sessionID)
 );
 
