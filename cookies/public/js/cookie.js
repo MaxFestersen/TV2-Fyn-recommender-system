@@ -225,4 +225,4 @@ document.addEventListener('visibilitychange', function(){
 document.addEventListener('click', function(){
     scrollY = maxScroll;
     updateSession(scrollY);
-})
+});
