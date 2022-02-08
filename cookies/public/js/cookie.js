@@ -210,16 +210,19 @@ document.addEventListener('scroll', function() {
     if(scrollPercentage() > maxScroll){
         maxScroll = Math.round(scrollPercentage());
     }
-    const scrollY = maxScroll;
+    scrollY = maxScroll;
 	updateSession(scrollY);
 });
 
 /* Pushing updated elapsed time and scrollY to database, when switching tabs */
-document.addEventListener('visibilitychange', async function(){
+document.addEventListener('visibilitychange', function(){
     if (document.visibilityState === 'hidden') {
-        const scrollY = maxScroll;
+        scrollY = maxScroll;
 		updateSession(scrollY);
     }
 });
 
-
+document.addEventListener('click', function(){
+    scrollY = maxScroll;
+    updateSession(scrollY);
+})
