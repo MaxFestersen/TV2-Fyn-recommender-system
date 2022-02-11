@@ -38,6 +38,22 @@ function getOS() {
     return OSName;
 }
 
+function getBrowser() {
+	// inspired by https://codepedia.info/detect-browser-in-javascript
+	var browserName = (function (agent) {
+		switch(true) {
+            case agent.indexOf("edge") > -1: return "MS Edge";
+            case agent.indexOf("edg/") > -1: return "Edge ( chromium based)";
+            case agent.indexOf("opr") > -1 && !!window.opr: return "Opera";
+            case agent.indexOf("chrome") > -1 && !!window.chrome: return "Chrome";
+            case agent.indexOf("trident") > -1: return "MS IE";
+            case agent.indexOf("firefox") > -1: return "Mozilla Firefox";
+            case agent.indexOf("safari") > -1: return "Safari";
+            default: return "other";
+        }
+    })(window.navigator.userAgent.toLowerCase());
+	return(browserName)
+}
 
 /* function for checking if user-id is set, and if not sets it*/
 function checkCookieUserID(daysToExpire) {
@@ -55,6 +71,7 @@ function checkCookieUserID(daysToExpire) {
             var screenWidth = screen.width;
             var screenHeight = screen.height;
             var deviceOS = getOS();
+			var deviceVendor = getBrowser()
             if(deviceID != "" && firstVisit != "" && screenWidth != "" && screenHeight != "" && sessionID != ""){
                 $.ajax({
                     url: "php/device.php",
@@ -64,7 +81,8 @@ function checkCookieUserID(daysToExpire) {
                         firstVisit: firstVisit,
                         screenWidth: screenWidth,
                         screenHeight: screenHeight,
-                        deviceOS: deviceOS
+                        deviceOS: deviceOS,
+						deviceVendor: deviceVendor
                     },
                     cache: false,
                     success: function(){
