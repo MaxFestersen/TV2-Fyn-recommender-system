@@ -28,6 +28,17 @@ function getCookie(name) {
     return null;
 }
 
+function getOS() {
+    var OSName = "Unknown OS";
+    if (navigator.userAgent.indexOf("Win") != -1) OSName = "Windows";
+    if (navigator.userAgent.indexOf("Mac") != -1) OSName = "Macintosh";
+    if (navigator.userAgent.indexOf("Linux") != -1) OSName = "Linux";
+    if (navigator.userAgent.indexOf("Android") != -1) OSName = "Android";
+    if (navigator.userAgent.indexOf("like Mac") != -1) OSName = "iOS";
+    return OSName;
+}
+
+
 /* function for checking if user-id is set, and if not sets it*/
 function checkCookieUserID(daysToExpire) {
     let uID = getCookie('user-id');
@@ -43,6 +54,7 @@ function checkCookieUserID(daysToExpire) {
             var firstVisit = new Date().toISOString().split('T')[0];
             var screenWidth = screen.width;
             var screenHeight = screen.height;
+            var deviceOS = getOS();
             if(deviceID != "" && firstVisit != "" && screenWidth != "" && screenHeight != "" && sessionID != ""){
                 $.ajax({
                     url: "php/device.php",
@@ -51,11 +63,12 @@ function checkCookieUserID(daysToExpire) {
                         deviceID: deviceID,
                         firstVisit: firstVisit,
                         screenWidth: screenWidth,
-                        screenHeight: screenHeight
+                        screenHeight: screenHeight,
+                        deviceOS: deviceOS
                     },
                     cache: false,
                     success: function(){
-                        console.log(deviceID, firstVisit, screenHeight, screenWidth);
+                        console.log(deviceID, firstVisit, screenHeight, screenWidth, deviceOS);
                         $.ajax({
                             url: "php/device_session.php",
                             type: "POST",
@@ -226,3 +239,4 @@ document.addEventListener('click', function(){
     scrollY = maxScroll;
     updateSession(scrollY);
 });
+

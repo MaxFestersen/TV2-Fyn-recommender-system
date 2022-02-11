@@ -5,6 +5,7 @@ deviceID varchar(255) NOT NULL,
 firstVisit DATE,
 screenWidth int(10),
 screenHeight int(10),
+deviceOS varchar(255) NOT NULL,
 PRIMARY KEY (deviceID)
 );
 
