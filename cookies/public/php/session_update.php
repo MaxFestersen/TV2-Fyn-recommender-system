@@ -4,7 +4,7 @@ include '../../config/database.php';
 // PREPARE
 $stmt = $conn -> prepare("INSERT INTO `session`(`sessionID`, `elapsed`, `articleID`, `scrollY`) VALUES (?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
-`elapsed`= VALUES(`elapsed`) + `elapsed`, `scrollY`= GREATEST(VALUES(`scrollY`), `scrollY`);");
+`elapsed`= ADDTIME(VALUES(`elapsed`), `elapsed`), `scrollY`= GREATEST(VALUES(`scrollY`), `scrollY`);");
 $stmt -> bind_param("sssi", $sessionID, $elapsed, $articleID, $scrollY);
 
 // SET VALUES
