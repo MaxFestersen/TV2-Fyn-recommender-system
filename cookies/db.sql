@@ -10,7 +10,7 @@ deviceVendor varchar(255) NOT NULL,
 PRIMARY KEY (deviceID)
 );
 
-CREATE TABLE IF NOT EXISTS tv2fyn.device_session(
+CREATE TABLE IF NOT EXISTS tv2fyn.session(
 deviceID varchar(255) NOT NULL,
 sessionID varchar(255) NOT NULL,
 PRIMARY KEY (sessionID),
@@ -18,7 +18,7 @@ FOREIGN KEY (deviceID) REFERENCES device(deviceID)
 ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS tv2fyn.session(
+CREATE TABLE IF NOT EXISTS tv2fyn.sessionInfo(
 sessionID varchar(255) NOT NULL,
 date DATE,
 elapsed time,
@@ -27,6 +27,6 @@ scrollY	int(3),
 lat FLOAT(6,3),
 lon FLOAT(6,3),
 PRIMARY KEY (sessionID, articleID),
-FOREIGN KEY (sessionID) REFERENCES device_session(sessionID)
+FOREIGN KEY (sessionID) REFERENCES session(sessionID)
 ON DELETE CASCADE
 );

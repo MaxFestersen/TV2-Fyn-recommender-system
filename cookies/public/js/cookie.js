@@ -88,7 +88,7 @@ function checkCookieUserID(daysToExpire) {
                     success: function(){
                         console.log(deviceID, firstVisit, screenHeight, screenWidth, deviceOS);
                         $.ajax({
-                            url: "php/device_session.php",
+                            url: "php/session.php",
                             type: "POST",
                             data: {
                                 deviceID: deviceID,
@@ -111,7 +111,7 @@ function checkCookieUserID(daysToExpire) {
             var sessionID = sessionStorage.getItem("session-id");
             if(deviceID != "" && sessionID != ""){
                 $.ajax({
-                    url: "php/device_session.php",
+                    url: "php/session.php",
                     type: "POST",
                     data: {
                         deviceID: deviceID,
@@ -159,7 +159,7 @@ function getLocation() {
 function saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon){
 	if(sessionID != "" && date != "" && elapsed != "" && articleID != ""){
 		$.ajax({
-			url: "php/session.php",
+			url: "php/sessionInfo.php",
 			type: "POST",
 			data: {
 				sessionID: sessionID,
@@ -188,7 +188,7 @@ function updateSession(scrollY){
 
 	if(sessionID != "" && elapsed != "" && articleID != ""){
 		$.ajax({
-			url: "php/session_update.php",
+			url: "php/sessionInfo_update.php",
 			type: "POST",
 			data: {
 				sessionID: sessionID,

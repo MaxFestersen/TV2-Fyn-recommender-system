@@ -2,17 +2,12 @@
 include '../../config/database.php';
 
 // PREPARE
-$stmt = $conn -> prepare("INSERT INTO `session`(`sessionID`, `date`, `elapsed`, `articleID`, `scrollY`, `lat`, `lon`) VALUES (?, ?, ?, ?, ?, ?, ?)");
-$stmt -> bind_param("ssssidd", $sessionID, $date, $elapsed, $articleID, $scrollY, $lat, $lon);
+$stmt = $conn -> prepare("INSERT INTO `session`(`deviceID`, `sessionID`) VALUES (?, ?)");
+$stmt -> bind_param("ss", $deviceID, $sessionID);
 
 // SET VALUES
+$deviceID=$_POST['deviceID'];
 $sessionID=$_POST['sessionID'];
-$date=$_POST['date'];
-$elapsed=$_POST['elapsed'];
-$articleID=$_POST['articleID'];
-$scrollY=$_POST['scrollY'];
-$lat=str_replace(',', '.', $_POST['lat']);
-$lon=str_replace(',', '.', $_POST['lon']);
 
 // EXECUTE & PRINT RESULT
 if ($stmt->execute() === TRUE) {
