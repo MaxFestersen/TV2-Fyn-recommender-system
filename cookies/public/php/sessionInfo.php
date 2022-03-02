@@ -1,5 +1,6 @@
 <?php
-include '../../config/database.php';
+header("Access-Control-Allow-Origin: *"); // change * to http://tv2fyn.dk
+include(dirname(__DIR__).'../../config/database.php');
 
 // PREPARE
 $stmt = $conn -> prepare("INSERT INTO `sessionInfo`(`sessionID`, `date`, `elapsed`, `articleID`, `scrollY`, `lat`, `lon`) VALUES (?, ?, ?, ?, ?, ?, ?)");
@@ -26,3 +27,4 @@ if ($stmt->execute() === TRUE) {
 $stmt->close();
 $conn->close();
 ?>
+

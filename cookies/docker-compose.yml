@@ -1,0 +1,41 @@
+version: '3.1'
+
+services:
+  php:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+    volumes:
+      - ./public/php/:/var/www/html/php/
+      - ./public/js/:/var/www/html/js/
+      - ./config:/var/www/config/
+    secrets: 
+      - db_pass
+    depends_on:
+      - db
+
+  db:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    secrets:
+      - db_pass
+    environment:
+      MYSQL_USER: recommender
+      MYSQL_DATABASE: tv2fyn
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_pass
+      MYSQL_PASSWORD_FILE: /run/secrets/db_pass
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+      - ./db.sql:/docker-entrypoint-initdb.d/1.sql
+    ports:
+      - 3307:3306
+
+volumes: 
+  mysql-data:
+
+secrets: 
+  db_pass:
+    file: ./secrets/db_pass

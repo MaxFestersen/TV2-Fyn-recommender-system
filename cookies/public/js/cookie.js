@@ -55,6 +55,10 @@ function getBrowser() {
 	return(browserName)
 }
 
+// path of cookie scripts
+var script = document.currentScript;
+var fullUrl = script.src.split('/').slice(0, -2).join('/')+'/';
+
 /* function for checking if user-id is set, and if not sets it*/
 function checkCookieUserID(daysToExpire) {
     let uID = getCookie('user-id');
@@ -74,7 +78,7 @@ function checkCookieUserID(daysToExpire) {
 			var deviceVendor = getBrowser()
             if(deviceID != "" && firstVisit != "" && screenWidth != "" && screenHeight != "" && sessionID != ""){
                 $.ajax({
-                    url: "php/device.php",
+                    url: fullUrl + "php/device.php",
                     type: "POST",
                     data: {
                         deviceID: deviceID,
@@ -88,7 +92,7 @@ function checkCookieUserID(daysToExpire) {
                     success: function(){
                         console.log(deviceID, firstVisit, screenHeight, screenWidth, deviceOS);
                         $.ajax({
-                            url: "php/session.php",
+                            url: fullUrl + "php/session.php",
                             type: "POST",
                             data: {
                                 deviceID: deviceID,
@@ -111,7 +115,7 @@ function checkCookieUserID(daysToExpire) {
             var sessionID = sessionStorage.getItem("session-id");
             if(deviceID != "" && sessionID != ""){
                 $.ajax({
-                    url: "php/session.php",
+                    url: fullUrl + "php/session.php",
                     type: "POST",
                     data: {
                         deviceID: deviceID,
@@ -159,7 +163,7 @@ function getLocation() {
 function saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon){
 	if(sessionID != "" && date != "" && elapsed != "" && articleID != ""){
 		$.ajax({
-			url: "php/sessionInfo.php",
+			url: fullUrl + "php/sessionInfo.php",
 			type: "POST",
 			data: {
 				sessionID: sessionID,
@@ -188,7 +192,7 @@ function updateSession(scrollY){
 
 	if(sessionID != "" && elapsed != "" && articleID != ""){
 		$.ajax({
-			url: "php/sessionInfo_update.php",
+			url: fullUrl + "php/sessionInfo_update.php",
 			type: "POST",
 			data: {
 				sessionID: sessionID,
