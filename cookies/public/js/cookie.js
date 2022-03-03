@@ -78,25 +78,17 @@ function checkCookieUserID(daysToExpire) {
 			var deviceVendor = getBrowser()
             if(deviceID != "" && firstVisit != "" && screenWidth != "" && screenHeight != "" && sessionID != ""){
 				let xhttp = new XMLHttpRequest();
-				xhttp.open("POST", "php/device.php", true);
+				xhttp.open("POST", fullUrl + "php/device.php", true);
 				xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-				let data = '' +
-					'deviceID' + '=' + deviceID + '&' +
-					'firstVisit' + '=' + firstVisit + '&' +
-					'screenWidth' + '=' + screenWidth
-					'screenHeight' + '=' + screenHeight + '&' +
-					'deviceOS' + '=' + deviceOS + '&' +
-					'deviceVendor' + '=' + deviceVendor;
+				let data = `deviceID=${deviceID}&firstVisit=${firstVisit}&screenWidth=${screenWidth}&screenHeight=${screenHeight}&deviceOS=${deviceOS}&deviceVendor=${deviceVendor}`;
 				xhttp.onreadystatechange = function() {
 					// Tilsvarende succes
 					console.log(deviceID, firstVisit, screenHeight, screenWidth, deviceOS);
 					console.log(xhttp.responseText);
 					let xhttp = new XMLHttpRequest();
-					xhttp.open("POST", "php/session.php", true);
+					xhttp.open("POST", fullUrl + "php/session.php", true);
 					xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-					let data = '' +
-						'deviceID' + '=' + deviceID + '&' +
-						'sessionID' + '=' + sessionID;
+					let data = `deviceID=${deviceID}&sessionID=${sessionID}`;
 					xhttp.onreadystatechange = function() {
 						console.log(deviceID, sessionID);
 						console.log(xhttp.responseText);
@@ -143,11 +135,9 @@ function checkCookieUserID(daysToExpire) {
             var sessionID = sessionStorage.getItem("session-id");
             if(deviceID != "" && sessionID != ""){
 				let xhttp = new XMLHttpRequest();
-				xhttp.open("POST", "php/session.php", true);
+				xhttp.open("POST", fullUrl + "php/session.php", true);
 				xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-				let data = '' +
-					'deviceID' + '=' + deviceID + '&' +
-					'sessionID' + '=' +  sessionID;
+				let data = `deviceID=${deviceID}&sessionID=${sessionID}`;
 				xhttp.onreadystatechange  = function() {
 					console.log(deviceID, sessionID);
 					console.log(xhttp.responseText);
@@ -202,16 +192,9 @@ function getLocation() {
 function saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon){
 	if(sessionID != "" && date != "" && elapsed != "" && articleID != ""){
 		let xhttp = new XMLHttpRequest();
-		xhttp.open("POST", "php/sessionInfo.php", true);
+		xhttp.open("POST", fullUrl + "php/sessionInfo.php", true);
 		xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-		let data = '' +
-			'sessionID' + '=' + sessionID + '&' +
-			'date' + '=' + date + '&' +
-			'elapsed' + '=' + elapsed + '&' +
-			'articleID' + '=' + articleID + '&' +
-			'scrollY' + '=' + scrollY + '&' +
-			'lat' + '=' + lat + '&' +
-			'lon' + '=' + lon;
+		let data = `sessionID=${sessionID}&date=${date}&elapsed=${elapsed}&articleID=${articleID}&scrollY=${scrollY}&lat=${lat}&lon=${lon}`;
 		xhttp.onreadystatechange = function() {
 			// Tilsvarende succes
 			console.log(sessionID, date, elapsed, articleID, scrollY, lat, lon);
@@ -248,13 +231,9 @@ function updateSession(scrollY){
 
 	if(sessionID != "" && elapsed != "" && articleID != ""){
 				let xhttp = new XMLHttpRequest();
-		xhttp.open("POST", "php/sessionInfo_update.php", true);
+		xhttp.open("POST", fullUrl + "php/sessionInfo_update.php", true);
 		xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-		let data = '' +
-			'sessionID' + '=' + sessionID + '&' +
-			'elapsed' + '=' + elapsed
-			'articleID' + '=' + articleID + '&' +
-			'scrollY' + '=' + scrollY;
+		let data = `sessionID=${sessionID}&elapsed=${elapsed}&articleID=${articleID}&scrollY=${scrollY}`;
 		xhttp.onreadystatechange = function() {
 			// Tilsvarende succes
 			console.log(sessionID, elapsed, articleID, scrollY);
