@@ -68,7 +68,7 @@ function checkCookieUserID(daysToExpire) {
         setCookie("user-id", userID(), daysToExpire);
         sessionStorage.setItem("session-id", userID() + "-s");
         // Pushing user-id (deviceID) and session-id (sessionID) to database 
-        $(document).ready(function(){
+		document.addEventListener("DOMContentLoaded", function() {
             var deviceID = getCookie('user-id');
             var sessionID = sessionStorage.getItem("session-id");
             var firstVisit = new Date().toISOString().split('T')[0];
@@ -77,7 +77,34 @@ function checkCookieUserID(daysToExpire) {
             var deviceOS = getOS();
 			var deviceVendor = getBrowser()
             if(deviceID != "" && firstVisit != "" && screenWidth != "" && screenHeight != "" && sessionID != ""){
-                $.ajax({
+				let xhttp = new XMLHttpRequest();
+				xhttp.open("POST", "php/device.php", true);
+				xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				let data = '' +
+					'deviceID' + '=' + deviceID + '&' +
+					'firstVisit' + '=' + firstVisit + '&' +
+					'screenWidth' + '=' + screenWidth
+					'screenHeight' + '=' + screenHeight + '&' +
+					'deviceOS' + '=' + deviceOS + '&' +
+					'deviceVendor' + '=' + deviceVendor;
+				xhttp.onreadystatechange = function() {
+					// Tilsvarende succes
+					console.log(deviceID, firstVisit, screenHeight, screenWidth, deviceOS);
+					console.log(xhttp.responseText);
+					let xhttp = new XMLHttpRequest();
+					xhttp.open("POST", "php/session.php", true);
+					xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+					let data = '' +
+						'deviceID' + '=' + deviceID + '&' +
+						'sessionID' + '=' + sessionID;
+					xhttp.onreadystatechange = function() {
+						console.log(deviceID, sessionID);
+						console.log(xhttp.responseText);
+					}
+					xhttp.send(data);
+				}
+				xhttp.send(data);
+				/*$.ajax({
                     url: fullUrl + "php/device.php",
                     type: "POST",
                     data: {
@@ -104,17 +131,29 @@ function checkCookieUserID(daysToExpire) {
                             }
                         })
                     }
-                })
+                })*/
             }
-        })
+        });
     }else if (sID == null){
         // Setting session-id (sessionID) if not set, and pushing session-id (sessionID) with user-id (deviceID) to database
         sessionStorage.setItem("session-id", userID() + "-s");
-        $(document).ready(function(){
+        //$(document).ready(function(){
+		document.addEventListener("DOMContentLoaded", function() {
             var deviceID = getCookie('user-id');
             var sessionID = sessionStorage.getItem("session-id");
             if(deviceID != "" && sessionID != ""){
-                $.ajax({
+				let xhttp = new XMLHttpRequest();
+				xhttp.open("POST", "php/session.php", true);
+				xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				let data = '' +
+					'deviceID' + '=' + deviceID + '&' +
+					'sessionID' + '=' +  sessionID;
+				xhttp.onreadystatechange  = function() {
+					console.log(deviceID, sessionID);
+					console.log(xhttp.responseText);
+				}
+				xhttp.send(data);
+                /*$.ajax({
                     url: fullUrl + "php/session.php",
                     type: "POST",
                     data: {
@@ -125,7 +164,7 @@ function checkCookieUserID(daysToExpire) {
                     succes: function(){
                         console.log(deviceID, sessionID);
                     }
-                })
+                })*/
             }
         })
     }
@@ -162,7 +201,24 @@ function getLocation() {
 /* Function for saving session info at first page load */
 function saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon){
 	if(sessionID != "" && date != "" && elapsed != "" && articleID != ""){
-		$.ajax({
+		let xhttp = new XMLHttpRequest();
+		xhttp.open("POST", "php/sessionInfo.php", true);
+		xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		let data = '' +
+			'sessionID' + '=' + sessionID + '&' +
+			'date' + '=' + date + '&' +
+			'elapsed' + '=' + elapsed + '&' +
+			'articleID' + '=' + articleID + '&' +
+			'scrollY' + '=' + scrollY + '&' +
+			'lat' + '=' + lat + '&' +
+			'lon' + '=' + lon;
+		xhttp.onreadystatechange = function() {
+			// Tilsvarende succes
+			console.log(sessionID, date, elapsed, articleID, scrollY, lat, lon);
+			console.log(xhttp.responseText);
+		}
+		xhttp.send(data);
+		/*$.ajax({
 			url: fullUrl + "php/sessionInfo.php",
 			type: "POST",
 			data: {
@@ -178,7 +234,7 @@ function saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon){
 			success: function(){
 				console.log(sessionID, date, elapsed, articleID, scrollY, lat, lon);
 			}
-		})
+		})*/
 	}
 }
 
@@ -191,7 +247,21 @@ function updateSession(scrollY){
     const elapsed = Math.floor(spentTime/1000);
 
 	if(sessionID != "" && elapsed != "" && articleID != ""){
-		$.ajax({
+				let xhttp = new XMLHttpRequest();
+		xhttp.open("POST", "php/sessionInfo_update.php", true);
+		xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+		let data = '' +
+			'sessionID' + '=' + sessionID + '&' +
+			'elapsed' + '=' + elapsed
+			'articleID' + '=' + articleID + '&' +
+			'scrollY' + '=' + scrollY;
+		xhttp.onreadystatechange = function() {
+			// Tilsvarende succes
+			console.log(sessionID, elapsed, articleID, scrollY);
+			console.log(xhttp.responseText);
+		}
+		xhttp.send(data);
+		/*$.ajax({
 			url: fullUrl + "php/sessionInfo_update.php",
 			type: "POST",
 			data: {
@@ -204,7 +274,7 @@ function updateSession(scrollY){
 			success: function(){
 				console.log(sessionID, elapsed, articleID, scrollY);
 			}
-		})
+		})*/
 	}
     startDate = new Date(); // resetting start date after each update
 }
