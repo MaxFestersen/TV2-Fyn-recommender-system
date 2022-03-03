@@ -5,8 +5,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - 80:80
     volumes:
       - ./public/php/:/var/www/html/php/
       - ./public/js/:/var/www/html/js/
@@ -31,7 +29,7 @@ services:
       - ./mysql-data:/var/lib/mysql
       - ./db.sql:/docker-entrypoint-initdb.d/1.sql
     ports:
-      - 3307:3306
+      - '3306:3306/tcp'
 
 volumes: 
   mysql-data:
