@@ -15,11 +15,12 @@ import pandas as pd
 
 #%%
 load_dotenv()
+db_host = os.environ.get('db-host')
 db_user = os.environ.get('db-user')
 db_pass = os.environ.get('db-pass')
 #%%
 mydb = mysql.connector.connect(
-    host="localhost",
+    host=db_host,
     user=db_user,
     password=db_pass,
     database='tv2fyn')
