@@ -316,21 +316,6 @@ var fullUrl = script.src.split('/').slice(0, -2).join('/')+'/';
 window.addEventListener('load', (event) => {
 	let daysToExpire = 30; // number of days before cookie expires
 
-    (async function() {
-        pos = await getLocation();
-    })().then(() => {
-        // If succes
-        let lat = pos.coords.latitude.toFixed(3); // Get latitude and generalise position
-        let lon = pos.coords.longitude.toFixed(3); // Get longitude and generalise position
-        saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon);
-    }).catch((err) => {
-        // If failed
-        console.error(err);
-        let lat = "0,0"; 
-        let lon = "0,0";
-        saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon);
-    })
-});
 	/* Initiating variables to be updated */
 	startDate = new Date();
 	let maxScroll = 0; 
@@ -350,6 +335,21 @@ document.addEventListener('scroll', function() {
     scrollY = maxScroll;
 	updateSession(scrollY);
 });
+	(async function() {
+		checkCookieUserID(daysToExpire);
+		pos = await getLocation();
+	})().then(() => {
+		// If succes
+		let lat = pos.coords.latitude.toFixed(3); // Get latitude and generalise position
+		let lon = pos.coords.longitude.toFixed(3); // Get longitude and generalise position
+		saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon);
+	}).catch((err) => {
+		// If failed
+		console.error(err);
+		let lat = "0,0"; 
+		let lon = "0,0";
+		saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon);
+	})
 
 /* Pushing updated elapsed time and scrollY to database, when switching tabs */
 document.addEventListener('visibilitychange', function(){
