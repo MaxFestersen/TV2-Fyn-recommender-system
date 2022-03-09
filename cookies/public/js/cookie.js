@@ -326,15 +326,6 @@ window.addEventListener('load', (event) => {
 	const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
 	let scrollY = maxScroll;
 
-/* Updating maxScroll whenever scrolling is happening,
-and updating elapsed and scrollY in database */
-document.addEventListener('scroll', function() {
-    if(scrollPercentage() > maxScroll){
-        maxScroll = Math.round(scrollPercentage());
-    }
-    scrollY = maxScroll;
-	updateSession(scrollY);
-});
 	(async function() {
 		checkCookieUserID(daysToExpire);
 		pos = await getLocation();
@@ -351,16 +342,27 @@ document.addEventListener('scroll', function() {
 		saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon);
 	})
 
-/* Pushing updated elapsed time and scrollY to database, when switching tabs */
-document.addEventListener('visibilitychange', function(){
-    if (document.visibilityState === 'hidden') {
-        scrollY = maxScroll;
+	/* Updating maxScroll whenever scrolling is happening,
+	and updating elapsed and scrollY in database */
+	document.addEventListener('scroll', function() {
+		if(scrollPercentage() > maxScroll){
+			maxScroll = Math.round(scrollPercentage());
+		}
+		scrollY = maxScroll;
 		updateSession(scrollY);
-    }
-});
+	});
 
-document.addEventListener('click', function(){
-    scrollY = maxScroll;
-    updateSession(scrollY);
+	/* Pushing updated elapsed time and scrollY to database, when switching tabs */
+	document.addEventListener('visibilitychange', function(){
+		if (document.visibilityState === 'hidden') {
+			scrollY = maxScroll;
+			updateSession(scrollY);
+		}
+	});
+
+	document.addEventListener('click', function(){
+		scrollY = maxScroll;
+		updateSession(scrollY);
+	});
 });
 
