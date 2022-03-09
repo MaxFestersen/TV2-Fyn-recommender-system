@@ -55,10 +55,6 @@ function getBrowser() {
 	return(browserName)
 }
 
-// path of cookie scripts
-var script = document.currentScript;
-var fullUrl = script.src.split('/').slice(0, -2).join('/')+'/';
-
 /* function for checking if user-id is set, and if not sets it*/
 function checkCookieUserID(daysToExpire) {
     let uID = getCookie('user-id');
@@ -159,14 +155,6 @@ function checkCookieUserID(daysToExpire) {
         })
     }
 }
-
-let daysToExpire = 30; // number of days before cookie expires
-checkCookieUserID(daysToExpire);
-
-/* Initiating variables to be updated */
-let startDate = new Date();
-let maxScroll = 0; 
-
 /* Get user location */
 /* Inspiration
 	- https://www.w3schools.com/html/html5_geolocation.asp
@@ -264,13 +252,13 @@ function scrollPercentage() {
     return scrollPercentage;
 }
 
+// path of cookie scripts
+var script = document.currentScript;
+var fullUrl = script.src.split('/').slice(0, -2).join('/')+'/';
+
 /* Pushing session info to database when page loads */
 window.addEventListener('load', (event) => {
-    const sessionID = sessionStorage.getItem("session-id");
-    const date = new Date().toISOString().split('T')[0];
-    const elapsed = 1; // can't be zero, so initial value is 1
-    const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
-    const scrollY = maxScroll;
+	let daysToExpire = 30; // number of days before cookie expires
 
     (async function() {
         pos = await getLocation();
@@ -287,6 +275,15 @@ window.addEventListener('load', (event) => {
         saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon);
     })
 });
+	/* Initiating variables to be updated */
+	startDate = new Date();
+	let maxScroll = 0; 
+	
+	const sessionID = sessionStorage.getItem("session-id");
+	const date = new Date().toISOString().split('T')[0];
+	const elapsed = 1; // can't be zero, so initial value is 1
+	const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
+	let scrollY = maxScroll;
 
 /* Updating maxScroll whenever scrolling is happening,
 and updating elapsed and scrollY in database */
