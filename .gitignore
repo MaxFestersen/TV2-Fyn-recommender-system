@@ -25,6 +25,7 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+scripts/.env
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
@@ -130,7 +131,7 @@ dmypy.json
 # vscode
 .vscode/
 
-# php
-
-cookies/config/
+# Docker
+cookies/secrets
+cookies/mysql-data
 
