@@ -81,8 +81,16 @@ function checkCookieUserID(daysToExpire) {
 		
 			// Define what happens on successful data submission
 			xhttp.addEventListener( 'load', function(event) {
-				console.log('checkCookieUserID succes');
-				console.log(deviceID, firstVisit, screenHeight, screenWidth, deviceOS);
+				if(!xhttp.responseText.includes("Error") && !xhttp.responseText.includes("<br/>")){
+					// Succes
+					console.log('checkCookieUserID succes');
+					//console.error(xhttp.responseText);
+					//console.log(deviceID, firstVisit, screenHeight, screenWidth, deviceOS);
+				} else{
+					// Error
+					console.log('checkCookieUserID error');
+					console.error(xhttp.responseText);
+				}
 			});
 
 			// Define what happens in case of error
@@ -101,8 +109,15 @@ function checkCookieUserID(daysToExpire) {
 			//console.log(data2);
 			
 			xhttp2.addEventListener( 'load', function(event) {
-				console.log('checkCookieUserID second succes');
-				console.log(deviceID, sessionID);
+				if(!xhttp2.responseText.includes("Error") && !xhttp.responseText.includes("<br/>")){
+					// Succes
+					console.log('checkCookieUserID second succes');
+					//console.log(deviceID, sessionID);
+				} else{
+					// Error
+					console.log('checkCookieUserID second error');
+					console.error(xhttp2.responseText);
+				}
 			});
 			
 			// Define what happens in case of error
@@ -128,8 +143,15 @@ function checkCookieUserID(daysToExpire) {
 			//console.log(data);
 
 			xhttp.addEventListener( 'load', function(event) {
-				console.log('checkCookieUserID else succes');
-				console.log(deviceID, sessionID);
+				if(!xhttp.responseText.includes("Error") && !xhttp.responseText.includes("<br/>")){
+					// Succes
+					console.log('checkCookieUserID else succes');
+					//console.log(deviceID, sessionID);
+				} else{
+					// Error
+					console.log('checkCookieUserID else error');
+					console.error(xhttp.responseText);
+				}
 			});
 			
 			// Define what happens in case of error
@@ -170,7 +192,15 @@ function saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon){
 		
 		// Define what happens on successful data submission
 		xhttp.addEventListener( 'load', function(event) {
-			console.log('saveSession succes');
+			if(!xhttp.responseText.includes("Error") && !xhttp.responseText.includes("<br/>")){
+				// Succes
+				console.log('saveSession succes');	
+			} else{
+				// Error
+				console.log('saveSession error');
+				console.log(sessionID, date, elapsed, articleID, scrollY, lat, lon);
+				console.error(xhttp.responseText);
+			}
 		});
 
 		// Define what happens in case of error
@@ -206,7 +236,14 @@ function updateSession(scrollY){
 		
 		// Define what happens on successful data submission
 		xhttp.addEventListener( 'load', function(event) {
-			console.log('updateSession succes');
+			if(!xhttp.responseText.includes("Error") && !xhttp.responseText.includes("<br/>")){
+				// Succes
+				console.log('updateSession succes');
+			} else{
+				// Error
+				console.log('updateSession error');
+				console.error(xhttp.responseText);
+			}
 		});
 
 		// Define what happens in case of error
