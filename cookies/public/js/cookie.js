@@ -77,7 +77,7 @@ function checkCookieUserID(daysToExpire) {
 			xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 			let data = `deviceID=${deviceID}&firstVisit=${firstVisit}&screenWidth=${screenWidth}&screenHeight=${screenHeight}&deviceOS=${deviceOS}&deviceVendor=${deviceVendor}`;
 			data = data.replace( /%20/g, '+' );
-			console.log(data);
+			//console.log(data);
 		
 			// Define what happens on successful data submission
 			xhttp.addEventListener( 'load', function(event) {
@@ -87,8 +87,8 @@ function checkCookieUserID(daysToExpire) {
 
 			// Define what happens in case of error
 			xhttp.addEventListener( 'error', function(event) {
-				console.log('checkCookieUserID error');
-				console.log(xhttp.responseText);
+				console.log('checkCookieUserID server error');
+				console.error(xhttp.responseText);
 			});
 
 			xhttp.send(data);
@@ -98,7 +98,7 @@ function checkCookieUserID(daysToExpire) {
 			xhttp2.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 			let data2 = `deviceID=${deviceID}&sessionID=${sessionID}`;
 			data2 = data2.replace( /%20/g, '+' );
-			console.log(data2);
+			//console.log(data2);
 			
 			xhttp2.addEventListener( 'load', function(event) {
 				console.log('checkCookieUserID second succes');
@@ -107,39 +107,11 @@ function checkCookieUserID(daysToExpire) {
 			
 			// Define what happens in case of error
 			xhttp2.addEventListener( 'error', function(event) {
-				console.log('checkCookieUserID second error');
-				console.log(xhttp2.responseText);
+				console.log('checkCookieUserID second server error');
+				console.error(xhttp2.responseText);
 			});
 			
 			xhttp2.send(data2);
-			/*$.ajax({
-				url: fullUrl + "php/device.php",
-				type: "POST",
-				data: {
-					deviceID: deviceID,
-					firstVisit: firstVisit,
-					screenWidth: screenWidth,
-					screenHeight: screenHeight,
-					deviceOS: deviceOS,
-					deviceVendor: deviceVendor
-				},
-				cache: false,
-				success: function(){
-					console.log(deviceID, firstVisit, screenHeight, screenWidth, deviceOS);
-					$.ajax({
-						url: fullUrl + "php/session.php",
-						type: "POST",
-						data: {
-							deviceID: deviceID,
-							sessionID: sessionID
-						},
-						cache: false,
-						succes: function(){
-							console.log(deviceID, sessionID);
-						}
-					})
-				}
-			})*/
 		}
     } else if (sID == null){
         // Setting session-id (sessionID) if not set, and pushing session-id (sessionID) with user-id (deviceID) to database
@@ -153,7 +125,7 @@ function checkCookieUserID(daysToExpire) {
 			xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 			let data = `deviceID=${deviceID}&sessionID=${sessionID}`;
 			data = data.replace( /%20/g, '+' );
-			console.log(data);
+			//console.log(data);
 
 			xhttp.addEventListener( 'load', function(event) {
 				console.log('checkCookieUserID else succes');
@@ -162,23 +134,11 @@ function checkCookieUserID(daysToExpire) {
 			
 			// Define what happens in case of error
 			xhttp.addEventListener( 'error', function(event) {
-				console.log('checkCookieUserID else error');
-				console.log(xhttp2.responseText);
+				console.log('checkCookieUserID else server error');
+				console.error(xhttp2.responseText);
 			});
 			
 			xhttp.send(data);
-			/*$.ajax({
-				url: fullUrl + "php/session.php",
-				type: "POST",
-				data: {
-					deviceID: deviceID,
-					sessionID: sessionID
-				},
-				cache: false,
-				succes: function(){
-					console.log(deviceID, sessionID);
-				}
-			})*/
 		}
     }
 }
@@ -215,39 +175,16 @@ function saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon){
 
 		// Define what happens in case of error
 		xhttp.addEventListener( 'error', function(event) {
-			console.log('saveSession error');
-			console.log(xhttp.responseText);
+			console.log('saveSession server error');
+			console.error(xhttp.responseText);
 		});
 		
 		xhttp.open("POST", fullUrl + "php/sessionInfo.php", true);
 		xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 		let data = `sessionID=${sessionID}&date=${date}&elapsed=${elapsed}&articleID=${articleID}&scrollY=${scrollY}&lat=${lat}&lon=${lon}`;
 		data = data.replace( /%20/g, '+' );
-		console.log(data);
-		/*xhttp.onreadystatechange = function() {
-			// Tilsvarende succes
-			console.log(sessionID, date, elapsed, articleID, scrollY, lat, lon);
-			console.log(xhttp.responseText);
-			
-		};*/
+		//console.log(data);
 		xhttp.send(data);
-		/*$.ajax({
-			url: fullUrl + "php/sessionInfo.php",
-			type: "POST",
-			data: {
-				sessionID: sessionID,
-				date: date,
-				elapsed: elapsed,
-				articleID: articleID,
-				scrollY: scrollY,
-				lat: lat,
-				lon: lon
-			},
-			cache: false,
-			success: function(){
-				console.log(sessionID, date, elapsed, articleID, scrollY, lat, lon);
-			}
-		})*/
 	}
 }
 
@@ -265,7 +202,7 @@ function updateSession(scrollY){
 		xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
 		let data = `sessionID=${sessionID}&elapsed=${elapsed}&articleID=${articleID}&scrollY=${scrollY}`;
 		data = data.replace( /%20/g, '+' );
-		console.log(data);
+		//console.log(data);
 		
 		// Define what happens on successful data submission
 		xhttp.addEventListener( 'load', function(event) {
@@ -274,30 +211,11 @@ function updateSession(scrollY){
 
 		// Define what happens in case of error
 		xhttp.addEventListener( 'error', function(event) {
-			console.log('updateSession error');
-			console.log(xhttp.responseText);
+			console.log('updateSession server error');
+			console.error(xhttp.responseText);
 		});
 
-		/*xhttp.onreadystatechange = function() {
-			// Tilsvarende succes
-			console.log(sessionID, elapsed, articleID, scrollY);
-			console.log(xhttp.responseText);
-		}*/
 		xhttp.send(data);
-		/*$.ajax({
-			url: fullUrl + "php/sessionInfo_update.php",
-			type: "POST",
-			data: {
-				sessionID: sessionID,
-				elapsed: elapsed,
-				articleID: articleID,
-				scrollY: scrollY,
-			},
-			cache: false,
-			success: function(){
-				console.log(sessionID, elapsed, articleID, scrollY);
-			}
-		})*/
 	}
     startDate = new Date(); // resetting start date after each update
 }
