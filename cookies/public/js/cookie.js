@@ -186,8 +186,9 @@ function getLocation() {
 }
 
 /* Function for saving session info at first page load */
-function saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon){
-	if(sessionID != "" && date != "" && elapsed != "" && articleID != ""){
+function saveSession(date, elapsed, articleID, scrollY, lat, lon){
+	if(date != "" && elapsed != "" && articleID != ""){
+		const sessionID = sessionStorage.getItem("session-id");
 		let xhttp = new XMLHttpRequest();
 		
 		// Define what happens on successful data submission
@@ -275,7 +276,7 @@ window.addEventListener('load', (event) => {
 	startDate = new Date();
 	let maxScroll = 0; 
 	
-	const sessionID = sessionStorage.getItem("session-id");
+	//const sessionID = sessionStorage.getItem("session-id");
 	const date = new Date().toISOString().split('T')[0];
 	const elapsed = 1; // can't be zero, so initial value is 1
 	const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
@@ -288,7 +289,7 @@ window.addEventListener('load', (event) => {
 		// If succes
 		let lat = pos.coords.latitude.toFixed(3); // Get latitude and generalise position
 		let lon = pos.coords.longitude.toFixed(3); // Get longitude and generalise position
-		saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon);
+		saveSession(date, elapsed, articleID, scrollY, lat, lon);
 	}).catch((err) => {
 		// If failed
 		console.error(err);
