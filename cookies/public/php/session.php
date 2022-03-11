@@ -1,5 +1,6 @@
 <?php
 header("Access-Control-Allow-Origin: *"); // change * to http://tv2fyn.dk
+header('Content-type: text/plain; charset=utf-8'); // Set charset to utf-8
 include(dirname(__DIR__).'../../config/database.php');
 
 // PREPARE

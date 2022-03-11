@@ -1,5 +1,6 @@
 <?php
 header("Access-Control-Allow-Origin: *"); // change * to http://tv2fyn.dk
+header('Content-type: text/plain; charset=utf-8'); // Set charset to utf-8
 include(dirname(__DIR__).'../../config/database.php');
 
 // PREPARE
@@ -18,7 +19,6 @@ $deviceVendor=$_POST['deviceVendor'];
 if ($stmt->execute() === TRUE) {
 	echo "New record created successfully";
 } else {
-	//echo "Error: " . $sql . "<br>" . $conn->error;
 	echo "Error.<br>" . $stmt->error;
 }
 
@@ -26,4 +26,3 @@ if ($stmt->execute() === TRUE) {
 $stmt->close();
 $conn->close();
 ?>
-
