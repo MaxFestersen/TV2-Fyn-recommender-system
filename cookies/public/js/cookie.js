@@ -6,7 +6,7 @@ function setCookie(name,value,days) {
         date.setTime(date.getTime() + (days*24*60*60*1000));
         expires = "; expires=" + date.toUTCString();
     }
-    document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+    document.cookie = name + "=" + (value || "")  + expires + "; path=/; samesite=strict; secure";
 }
 
 /* userID is a string that consists of number of miliseconds since 1/1-1970 and a random 3 character integer */
