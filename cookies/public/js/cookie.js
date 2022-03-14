@@ -162,7 +162,10 @@ function checkCookieUserID(daysToExpire) {
 			
 			xhttp.send(data);
 		}
-    }
+    } else{
+		//console.log("Cookie update!")
+		setCookie("user-id", userID(), daysToExpire);
+	}
 }
 /* Get user location */
 /* Inspiration
