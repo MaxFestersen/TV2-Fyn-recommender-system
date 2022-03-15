@@ -11,7 +11,7 @@ $stmt -> bind_param("sssi", $sessionID, $elapsed, $articleID, $scrollY);
 
 // SET VALUES
 $sessionID=$_POST['sessionID'];
-$elapsed=$_POST['elapsed'];
+$elapsed=date('H:i:s', $_POST['elapsed']);
 $articleID=$_POST['articleID'];
 $scrollY=$_POST['scrollY'];
 

@@ -6,7 +6,7 @@ include(dirname(__DIR__).'../../config/database.php');
 // SET VALUES
 $sessionID=$_POST['sessionID'];
 $date=$_POST['date'];
-$elapsed=$_POST['elapsed'];
+$elapsed=date('H:i:s', $_POST['elapsed']);
 $articleID=$_POST['articleID'];
 $scrollY=$_POST['scrollY'];
 $lat=str_replace(',', '.', $_POST['lat']);
