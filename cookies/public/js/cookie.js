@@ -299,7 +299,7 @@ window.addEventListener('load', (event) => {
 		console.error(err);
 		let lat = "0,0"; 
 		let lon = "0,0";
-		saveSession(sessionID, date, elapsed, articleID, scrollY, lat, lon);
+		saveSession(date, elapsed, articleID, scrollY, lat, lon);
 	})
 
 	/* Updating maxScroll whenever scrolling is happening,
