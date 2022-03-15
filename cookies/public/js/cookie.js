@@ -291,12 +291,14 @@ window.addEventListener('load', (event) => {
 	let scrollY = maxScroll;
 
 	(async function() {
-		checkCookieUserID(daysToExpire);
 		pos = await getLocation();
+		dis = await checkCookieUserID(daysToExpire);
 	})().then(() => {
 		// If succes
 		let lat = pos.coords.latitude.toFixed(3); // Get latitude and generalise position
 		let lon = pos.coords.longitude.toFixed(3); // Get longitude and generalise position
+		//console.log(pos);
+		//console.log(dis);
 		saveSession(date, elapsed, articleID, scrollY, lat, lon);
 	}).catch((err) => {
 		// If failed
