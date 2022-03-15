@@ -128,6 +128,7 @@ function checkCookieUserID(daysToExpire) {
 			
 			xhttp2.send(data2);
 		}
+		return(1);
     } else if (sID == null){
         // Setting session-id (sessionID) if not set, and pushing session-id (sessionID) with user-id (deviceID) to database
         sessionStorage.setItem("session-id", userID() + "-s");
@@ -162,12 +163,15 @@ function checkCookieUserID(daysToExpire) {
 			
 			xhttp.send(data);
 		}
+		return(2);
     } else{
 		var deviceID = getCookie('user-id');
 		//console.log("Cookie update!")
 		setCookie("user-id", deviceID, daysToExpire);
+		return(3);
 	}
 }
+
 /* Get user location */
 /* Inspiration
 	- https://www.w3schools.com/html/html5_geolocation.asp
