@@ -70,7 +70,7 @@ function checkCookieUserID(daysToExpire) {
 		var screenWidth = screen.width;
 		var screenHeight = screen.height;
 		var deviceOS = getOS();
-		var deviceVendor = getBrowser()
+		var deviceVendor = getBrowser();
 		if(deviceID != "" && firstVisit != "" && screenWidth != "" && screenHeight != "" && sessionID != ""){
 			let xhttp = new XMLHttpRequest();
 			xhttp.open("POST", fullUrl + "php/device.php", true);
