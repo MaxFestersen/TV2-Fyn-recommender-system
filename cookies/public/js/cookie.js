@@ -163,8 +163,9 @@ function checkCookieUserID(daysToExpire) {
 			xhttp.send(data);
 		}
     } else{
+		var deviceID = getCookie('user-id');
 		//console.log("Cookie update!")
-		setCookie("user-id", userID(), daysToExpire);
+		setCookie("user-id", deviceID, daysToExpire);
 	}
 }
 /* Get user location */
