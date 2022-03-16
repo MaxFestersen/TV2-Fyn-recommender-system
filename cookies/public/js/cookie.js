@@ -9,6 +9,17 @@ function setCookie(name,value,days) {
     document.cookie = name + "=" + (value || "")  + expires + "; path=/; samesite=strict; secure";
 }
 
+function setSessionCookie(value){
+    document.cookie = "SessionCookie=" + (value || "") + "; path=/; samesite=strict; secure";
+}
+
+function checkSessionCookie(){
+	// Returns cookie value or null
+	return((document.cookie.match(/^(?:.*;)?\s*SessionCookie\s*=\s*([^;]+)(?:.*)?$/)||[,null])[1]) // Returns
+}
+
+
+
 /* userID is a string that consists of number of miliseconds since 1/1-1970 and a random 3 character integer */
 function userID() {
     var date = Date.now()
@@ -58,14 +69,19 @@ function getBrowser() {
 /* function for checking if user-id is set, and if not sets it*/
 function checkCookieUserID(daysToExpire) {
     let uID = getCookie('user-id');
-    let sID = sessionStorage.getItem('session-id');
+    let sID = checkSessionCookie();
     if (uID == null) {
        // If no user cookie is set, both user cookie and session id is set.
         setCookie("user-id", userID(), daysToExpire);
-        sessionStorage.setItem("session-id", userID() + "-s");
+		if(sID == null){
+			sessionStorage.setItem("session-id", userID() + "-s");
+			var sessionID = sessionStorage.getItem("session-id");
+			setSessionCookie(sessionID);
+		} else{
+			var sessionID = sID;
+		}
         // Pushing user-id (deviceID) and session-id (sessionID) to database 
 		var deviceID = getCookie('user-id');
-		var sessionID = sessionStorage.getItem("session-id");
 		var firstVisit = new Date().toISOString().split('T')[0];
 		var screenWidth = screen.width;
 		var screenHeight = screen.height;
@@ -135,6 +151,7 @@ function checkCookieUserID(daysToExpire) {
         //$(document).ready(function(){
 		var deviceID = getCookie('user-id');
 		var sessionID = sessionStorage.getItem("session-id");
+		setSessionCookie(sessionID);
 		if(deviceID != "" && sessionID != ""){
 			let xhttp = new XMLHttpRequest();
 			xhttp.open("POST", fullUrl + "php/session.php", true);
@@ -196,7 +213,7 @@ function getLocation() {
 /* Function for saving session info at first page load */
 function saveSession(date, elapsed, articleID, scrollY, lat, lon){
 	if(date != "" && elapsed != "" && articleID != ""){
-		const sessionID = sessionStorage.getItem("session-id");
+		const sessionID = checkSessionCookie();
 		let xhttp = new XMLHttpRequest();
 		
 		// Define what happens on successful data submission
@@ -284,13 +301,13 @@ function saveSession(date, elapsed, articleID, scrollY, lat, lon){
 
 /* Function for updating session info at event */
 function updateSession(scrollY){
-    const sessionID = sessionStorage.getItem("session-id");
+    const sessionID = checkSessionCookie();
     const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
     const endDate = new Date();
     const spentTime = endDate.getTime() - startDate.getTime();
     const elapsed = Math.floor(spentTime/1000);
 
-	if(sessionID != "" && elapsed != "" && articleID != ""){
+	if(sessionID !== null && elapsed != "" && articleID != ""){
 		let xhttp = new XMLHttpRequest();
 		xhttp.open("POST", fullUrl + "php/sessionInfo_update.php", true);
 		xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
