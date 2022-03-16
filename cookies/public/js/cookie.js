@@ -300,7 +300,7 @@ window.addEventListener('load', (event) => {
 		let lat = "0,0"; 
 		let lon = "0,0";
 		saveSession(date, elapsed, articleID, scrollY, lat, lon);
-	})
+	});
 
 	/* Updating maxScroll whenever scrolling is happening,
 	and updating elapsed and scrollY in database */
@@ -325,4 +325,3 @@ window.addEventListener('load', (event) => {
 		updateSession(scrollY);
 	});
 });
-
