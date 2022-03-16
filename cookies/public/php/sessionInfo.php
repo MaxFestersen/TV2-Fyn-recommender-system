@@ -25,23 +25,35 @@ $existsCheck->execute();
 $result = $existsCheck->get_result();
 
 // LOOP RESULTS (allthough it would seem unecesarry, a simple check seems to fail randomly, but that is surely another fault)
-while ($row = $result->fetch_assoc()){
-	//echo $row["COUNT(sessionID)"];
-    if($row["COUNT(sessionID)"]==0){
-		$existsCheck->close();
-		// PREPARE
-		$stmt = $conn -> prepare("INSERT INTO `sessionInfo`(`sessionID`, `date`, `elapsed`, `articleID`, `scrollY`, `lat`, `lon`) VALUES (?, ?, ?, ?, ?, ?, ?)");
-		$stmt -> bind_param("ssssidd", $sessionID, $date, $elapsed, $articleID, $scrollY, $lat, $lon);
-		
-		// EXECUTE & PRINT RESULT
-		if ($stmt->execute() === TRUE) {
-			echo "New record created successfully";
-		} else {
-			//echo "Error: " . $sql . "<br>" . $conn->error;
-			echo "Error.<br>" . $stmt->error;
-		}
-		$stmt->close();
+$row = $result->fetch_assoc();	//echo $row["COUNT(sessionID)"];
+$existsCheck->close();
+if($row["COUNT(sessionID)"]==0){
+	// PREPARE
+	$stmt = $conn -> prepare("INSERT INTO `sessionInfo`(`sessionID`, `date`, `elapsed`, `articleID`, `scrollY`, `lat`, `lon`) VALUES (?, ?, ?, ?, ?, ?, ?)");
+	$stmt -> bind_param("ssssidd", $sessionID, $date, $elapsed, $articleID, $scrollY, $lat, $lon);
+	
+	// EXECUTE & PRINT RESULT
+	if ($stmt->execute() === TRUE) {
+		echo "New record created successfully";
+	} else {
+		//echo "Error: " . $sql . "<br>" . $conn->error;
+		echo "Error.<br>" . $stmt->error;
 	}
+	$stmt->close();
+} else {
+	// PREPARE
+	$stmt = $conn -> prepare("UPDATE `sessionInfo` SET `date` = ?, `lat` = ?, `lon` = ? WHERE `sessionID` = ? AND `articleID` = ?;");
+	$stmt -> bind_param("sddss", $date, $lat, $lon, $sessionID, $articleID);
+	
+	// EXECUTE & PRINT RESULT
+	if ($stmt->execute() === TRUE) {
+		//echo "Error.<br>" . $lat;
+		echo "New record updated successfully";
+	} else {
+		//echo "Error: " . $sql . "<br>" . $conn->error;
+		echo "Error.<br>" . $stmt->error;
+	}
+	$stmt->close();
 }
 
 //CLOSE CONNECTIONS

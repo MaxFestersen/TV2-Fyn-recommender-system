@@ -4,13 +4,14 @@ header('Content-type: text/plain; charset=utf-8'); // Set charset to utf-8
 include(dirname(__DIR__).'../../config/database.php');
 
 // PREPARE
-$stmt = $conn -> prepare("INSERT INTO `sessionInfo`(`sessionID`, `elapsed`, `articleID`, `scrollY`) VALUES (?, ?, ?, ?)
+$stmt = $conn -> prepare("INSERT INTO `sessionInfo`(`sessionID`, `date`, `elapsed`, `articleID`, `scrollY`) VALUES (?, ?, ?, ?, ?)
 ON DUPLICATE KEY UPDATE
 `elapsed`= ADDTIME(VALUES(`elapsed`), `elapsed`), `scrollY`= GREATEST(VALUES(`scrollY`), `scrollY`);");
-$stmt -> bind_param("sssi", $sessionID, $elapsed, $articleID, $scrollY);
+$stmt -> bind_param("ssssi", $sessionID, $date, $elapsed, $articleID, $scrollY);
 
 // SET VALUES
 $sessionID=$_POST['sessionID'];
+$date = date('Y-m-d');
 $elapsed=date('H:i:s', $_POST['elapsed']);
 $articleID=$_POST['articleID'];
 $scrollY=$_POST['scrollY'];
