@@ -203,12 +203,67 @@ function saveSession(date, elapsed, articleID, scrollY, lat, lon){
 		xhttp.addEventListener( 'load', function(event) {
 			if(!xhttp.responseText.includes("Error") && !xhttp.responseText.includes("<br/>")){
 				// Succes
-				console.log('saveSession succes');	
+				console.log('saveSession succes');
 			} else{
 				// Error
 				console.log('saveSession error');
 				console.log(sessionID, date, elapsed, articleID, scrollY, lat, lon);
 				console.error(xhttp.responseText);
+				// Attempting to add entry potential missing entry to session
+				let deviceID = getCookie('user-id');
+				let xhttpSession = new XMLHttpRequest();
+				xhttpSession.open("POST", fullUrl + "php/session.php", true);
+				xhttpSession.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+				let data = `deviceID=${deviceID}&sessionID=${sessionID}`;
+				data = data.replace( /%20/g, '+' );
+				//console.log(data);
+
+				xhttpSession.addEventListener( 'load', function(event) {
+					if(!xhttpSession.responseText.includes("Error") && !xhttpSession.responseText.includes("<br/>")){
+						// Succes
+						console.log('Missing session entry added succesfully');
+						//console.log(deviceID, sessionID);
+						let xhttp = new XMLHttpRequest();
+						
+						// Define what happens on successful data submission
+						xhttp.addEventListener( 'load', function(event) {
+							if(!xhttp.responseText.includes("Error") && !xhttp.responseText.includes("<br/>")){
+								// Succes
+								console.log('saveSession second attempt succes');
+							} else{
+								// Error
+								console.log('saveSession second attempt error');
+								console.log(sessionID, date, elapsed, articleID, scrollY, lat, lon);
+								console.error(xhttp.responseText);
+							}
+						});
+
+						// Define what happens in case of error
+						xhttp.addEventListener( 'error', function(event) {
+							console.log('saveSession second attempt server error');
+							console.error(xhttp.responseText);
+						});
+						
+						xhttp.open("POST", fullUrl + "php/sessionInfo.php", true);
+						xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+						let data = `sessionID=${sessionID}&date=${date}&elapsed=${elapsed}&articleID=${articleID}&scrollY=${scrollY}&lat=${lat}&lon=${lon}`;
+						data = data.replace( /%20/g, '+' );
+						//console.log(data);
+						xhttp.send(data);
+					} else{
+						// Error
+						console.log('saveSession else error');
+						console.error(xhttpSession.responseText);
+					}
+				});
+				
+				// Define what happens in case of error
+				xhttpSession.addEventListener( 'error', function(event) {
+					console.log('checkCookieUserID else server error');
+					console.error(xhttp2.responseText);
+				});
+				
+				xhttpSession.send(data);
 			}
 		});
 
