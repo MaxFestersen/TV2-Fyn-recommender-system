@@ -9,7 +9,7 @@ $stmt -> bind_param("ssiiss", $deviceID, $firstVisit, $screenWidth, $screenHeigh
 
 // EXECUTE
 $deviceID=$_POST['deviceID'];
-$firstVisit=$_POST['firstVisit'];
+$firstVisit= date('Y-m-d');
 $screenWidth=$_POST['screenWidth'];
 $screenHeight=$_POST['screenHeight'];
 $deviceOS=$_POST['deviceOS'];

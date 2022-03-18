@@ -20,7 +20,7 @@ ON DELETE CASCADE
 
 CREATE TABLE IF NOT EXISTS tv2fyn.sessionInfo(
 sessionID varchar(255) NOT NULL,
-date DATE,
+date DATETIME,
 elapsed time,
 articleID varchar(255) NOT NULL,
 scrollY	int(3),
