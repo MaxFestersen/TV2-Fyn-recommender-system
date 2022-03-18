@@ -12,11 +12,11 @@ from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, doc
 
 # Database libraries
-from mysql.connector import connect
+from flask_mysqldb import MySQL
 from dotenv import load_dotenv
 import os
 
-# Api
+# API
 app = Flask(__name__)  # Flask app instance initiated
 api = Api(app)  # Flask restful wraps Flask app around it.
 app.config.update({
@@ -30,6 +30,7 @@ app.config.update({
     'APISPEC_SWAGGER_UI_URL': '/swagger-ui/'  # URI to access UI of API Doc
 })
 
+
 # Initiating the swagger docs
 docs = FlaskApiSpec(app)
 
@@ -40,30 +41,33 @@ class article_schema(Schema):
 
 # Defining RecommenderAPI 
 class RecommenderAPI(MethodResource, Resource):
+    # MySQL connection
+    load_dotenv()
+    app.config['MYSQL_HOST'] = os.environ.get('db-host')
+    app.config['MYSQL_USER'] = os.environ.get('db-user')
+    app.config['MYSQL_PASSWORD'] = os.environ.get('db-pass')
+    app.config['MYSQL_DB'] = os.environ.get('db-database')
+    db = MySQL(app)
 
     # Connecting to cookie database
-    load_dotenv()
-    db=connect(
-        host=os.environ.get('db-host'),
-        user=os.environ.get('db-user'),
-        password=os.environ.get('db-pass'),
-        database=os.environ.get('db-database'))
-    cursor = db.cursor()
-
     def sessions(self, deviceID: str):
         '''
         Function for getting sessionID's of a given user from cookie database
         '''
-        self.cursor.execute(f'SELECT sessionID FROM session WHERE deviceID="{deviceID}";')
-        sessions = self.cursor.fetchall()
+        cur = self.db.connection.cursor()
+        cur.execute(f'SELECT sessionID FROM session WHERE deviceID="{deviceID}";')
+        sessions = cur.fetchall()
+        cur.close()
         return list(sum(sessions, ()))
     
     def articles(self, sessions: list):
         '''
         Function for getting articleID's of a users session from cookie database
         '''
-        self.cursor.execute('SELECT articleID FROM sessionInfo WHERE sessionID IN {};'.format('(' + ', '.join(f'"{s}"' for s in sessions) + ')'))
-        articles = self.cursor.fetchall()
+        cur = self.db.connection.cursor()
+        cur.execute('SELECT articleID FROM sessionInfo WHERE sessionID IN {};'.format('(' + ', '.join(f'"{s}"' for s in sessions) + ')'))
+        articles = cur.fetchall()
+        cur.close()
         return list(sum(articles, ()))
 
     @doc(description='Get all articleID\'s of a specific users history', tags=['Content Based'])
