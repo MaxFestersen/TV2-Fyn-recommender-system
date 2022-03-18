@@ -374,8 +374,8 @@ window.addEventListener('load', (event) => {
 		saveSession(date, elapsed, articleID, scrollY, lat, lon);
 	}).catch((err) => {
 		// If failed
-		console.error(err);
-		let lat = "0,0"; 
+		//console.log(err);
+		let lat = "0,0";
 		let lon = "0,0";
 		saveSession(date, elapsed, articleID, scrollY, lat, lon);
 	});
