@@ -74,8 +74,7 @@ function checkCookieUserID(daysToExpire) {
        // If no user cookie is set, both user cookie and session id is set.
         setCookie("user-id", userID(), daysToExpire);
 		if(sID == null){
-			sessionStorage.setItem("session-id", userID() + "-s");
-			var sessionID = sessionStorage.getItem("session-id");
+			var sessionID = userID() + "-s";
 			setSessionCookie(sessionID);
 		} else{
 			var sessionID = sID;
@@ -147,10 +146,9 @@ function checkCookieUserID(daysToExpire) {
 		return(1);
     } else if (sID == null){
         // Setting session-id (sessionID) if not set, and pushing session-id (sessionID) with user-id (deviceID) to database
-        sessionStorage.setItem("session-id", userID() + "-s");
         //$(document).ready(function(){
 		var deviceID = getCookie('user-id');
-		var sessionID = sessionStorage.getItem("session-id");
+		var sessionID = userID() + "-s";
 		setSessionCookie(sessionID);
 		if(deviceID != "" && sessionID != ""){
 			let xhttp = new XMLHttpRequest();
@@ -356,7 +354,6 @@ window.addEventListener('load', (event) => {
 	startDate = new Date();
 	let maxScroll = 0; 
 	
-	//const sessionID = sessionStorage.getItem("session-id");
 	const date = new Date().toISOString().split('T')[0];
 	const elapsed = 1; // can't be zero, so initial value is 1
 	const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
