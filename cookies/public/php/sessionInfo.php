@@ -5,7 +5,7 @@ include(dirname(__DIR__).'../../config/database.php');
 
 // SET VALUES
 $sessionID=$_POST['sessionID'];
-$date=$_POST['date'];
+$date= date('Y-m-d H:i:s');
 $elapsed=date('H:i:s', $_POST['elapsed']);
 $articleID=$_POST['articleID'];
 $scrollY=$_POST['scrollY'];
@@ -42,8 +42,8 @@ if($row["COUNT(sessionID)"]==0){
 	$stmt->close();
 } else {
 	// PREPARE
-	$stmt = $conn -> prepare("UPDATE `sessionInfo` SET `date` = ?, `lat` = ?, `lon` = ? WHERE `sessionID` = ? AND `articleID` = ?;");
-	$stmt -> bind_param("sddss", $date, $lat, $lon, $sessionID, $articleID);
+	$stmt = $conn -> prepare("UPDATE `sessionInfo` SET `lat` = ?, `lon` = ? WHERE `sessionID` = ? AND `articleID` = ?;");
+	$stmt -> bind_param("ddss", $lat, $lon, $sessionID, $articleID);
 	
 	// EXECUTE & PRINT RESULT
 	if ($stmt->execute() === TRUE) {

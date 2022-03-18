@@ -81,16 +81,15 @@ function checkCookieUserID(daysToExpire) {
 		}
         // Pushing user-id (deviceID) and session-id (sessionID) to database 
 		var deviceID = getCookie('user-id');
-		var firstVisit = new Date().toISOString().split('T')[0];
 		var screenWidth = screen.width;
 		var screenHeight = screen.height;
 		var deviceOS = getOS();
 		var deviceVendor = getBrowser();
-		if(deviceID != "" && firstVisit != "" && screenWidth != "" && screenHeight != "" && sessionID != ""){
+		if(deviceID != "" && screenWidth != "" && screenHeight != "" && sessionID != ""){
 			let xhttp = new XMLHttpRequest();
 			xhttp.open("POST", fullUrl + "php/device.php", true);
 			xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-			let data = `deviceID=${deviceID}&firstVisit=${firstVisit}&screenWidth=${screenWidth}&screenHeight=${screenHeight}&deviceOS=${deviceOS}&deviceVendor=${deviceVendor}`;
+			let data = `deviceID=${deviceID}&screenWidth=${screenWidth}&screenHeight=${screenHeight}&deviceOS=${deviceOS}&deviceVendor=${deviceVendor}`;
 			data = data.replace( /%20/g, '+' );
 			//console.log(data);
 		
@@ -100,7 +99,7 @@ function checkCookieUserID(daysToExpire) {
 					// Succes
 					console.log('checkCookieUserID succes');
 					//console.error(xhttp.responseText);
-					//console.log(deviceID, firstVisit, screenHeight, screenWidth, deviceOS);
+					//console.log(deviceID, screenHeight, screenWidth, deviceOS);
 				} else{
 					// Error
 					console.log('checkCookieUserID error');
@@ -209,8 +208,8 @@ function getLocation() {
 }
 
 /* Function for saving session info at first page load */
-function saveSession(date, elapsed, articleID, scrollY, lat, lon){
-	if(date != "" && elapsed != "" && articleID != ""){
+function saveSession(elapsed, articleID, scrollY, lat, lon){
+	if(elapsed != "" && articleID != ""){
 		const sessionID = checkSessionCookie();
 		let xhttp = new XMLHttpRequest();
 		
@@ -222,7 +221,7 @@ function saveSession(date, elapsed, articleID, scrollY, lat, lon){
 			} else{
 				// Error
 				console.log('saveSession error');
-				console.log(sessionID, date, elapsed, articleID, scrollY, lat, lon);
+				console.log(sessionID, elapsed, articleID, scrollY, lat, lon);
 				console.error(xhttp.responseText);
 				// Attempting to add entry potential missing entry to session
 				let deviceID = getCookie('user-id');
@@ -248,7 +247,7 @@ function saveSession(date, elapsed, articleID, scrollY, lat, lon){
 							} else{
 								// Error
 								console.log('saveSession second attempt error');
-								console.log(sessionID, date, elapsed, articleID, scrollY, lat, lon);
+								console.log(sessionID, elapsed, articleID, scrollY, lat, lon);
 								console.error(xhttp.responseText);
 							}
 						});
@@ -261,7 +260,7 @@ function saveSession(date, elapsed, articleID, scrollY, lat, lon){
 						
 						xhttp.open("POST", fullUrl + "php/sessionInfo.php", true);
 						xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-						let data = `sessionID=${sessionID}&date=${date}&elapsed=${elapsed}&articleID=${articleID}&scrollY=${scrollY}&lat=${lat}&lon=${lon}`;
+						let data = `sessionID=${sessionID}&elapsed=${elapsed}&articleID=${articleID}&scrollY=${scrollY}&lat=${lat}&lon=${lon}`;
 						data = data.replace( /%20/g, '+' );
 						//console.log(data);
 						xhttp.send(data);
@@ -290,7 +289,7 @@ function saveSession(date, elapsed, articleID, scrollY, lat, lon){
 		
 		xhttp.open("POST", fullUrl + "php/sessionInfo.php", true);
 		xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-		let data = `sessionID=${sessionID}&date=${date}&elapsed=${elapsed}&articleID=${articleID}&scrollY=${scrollY}&lat=${lat}&lon=${lon}`;
+		let data = `sessionID=${sessionID}&elapsed=${elapsed}&articleID=${articleID}&scrollY=${scrollY}&lat=${lat}&lon=${lon}`;
 		data = data.replace( /%20/g, '+' );
 		//console.log(data);
 		xhttp.send(data);
@@ -354,7 +353,6 @@ window.addEventListener('load', (event) => {
 	startDate = new Date();
 	let maxScroll = 0; 
 	
-	const date = new Date().toISOString().split('T')[0];
 	const elapsed = 1; // can't be zero, so initial value is 1
 	const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
 	let scrollY = maxScroll;
@@ -368,13 +366,13 @@ window.addEventListener('load', (event) => {
 		let lon = pos.coords.longitude.toFixed(3); // Get longitude and generalise position
 		//console.log(pos);
 		//console.log(dis);
-		saveSession(date, elapsed, articleID, scrollY, lat, lon);
+		saveSession(elapsed, articleID, scrollY, lat, lon);
 	}).catch((err) => {
 		// If failed
 		//console.log(err);
 		let lat = "0,0";
 		let lon = "0,0";
-		saveSession(date, elapsed, articleID, scrollY, lat, lon);
+		saveSession(elapsed, articleID, scrollY, lat, lon);
 	});
 
 	/* Updating maxScroll whenever scrolling is happening,
