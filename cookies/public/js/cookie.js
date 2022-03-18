@@ -379,13 +379,19 @@ window.addEventListener('load', (event) => {
 
 	/* Updating maxScroll whenever scrolling is happening,
 	and updating elapsed and scrollY in database */
-	document.addEventListener('scroll', function() {
-		if(scrollPercentage() > maxScroll){
-			maxScroll = Math.round(scrollPercentage());
-		}
-		scrollY = maxScroll;
-		updateSession(scrollY);
-	});
+	var isScrolling;
+	window.addEventListener('scroll', function(event ) {
+		// Clear our timeout throughout the scroll
+		window.clearTimeout( isScrolling );
+		// Set a timeout to run after scrolling ends
+		isScrolling = setTimeout(function() {
+			if(scrollPercentage() > maxScroll){
+				maxScroll = Math.round(scrollPercentage());
+			}
+			scrollY = maxScroll;
+			updateSession(scrollY);
+		}, 66);
+	}, false);
 
 	/* Pushing updated elapsed time and scrollY to database, when switching tabs */
 	document.addEventListener('visibilitychange', function(){
