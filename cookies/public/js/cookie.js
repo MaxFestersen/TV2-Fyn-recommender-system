@@ -74,8 +74,7 @@ function checkCookieUserID(daysToExpire) {
        // If no user cookie is set, both user cookie and session id is set.
         setCookie("user-id", userID(), daysToExpire);
 		if(sID == null){
-			sessionStorage.setItem("session-id", userID() + "-s");
-			var sessionID = sessionStorage.getItem("session-id");
+			var sessionID = userID() + "-s";
 			setSessionCookie(sessionID);
 		} else{
 			var sessionID = sID;
@@ -147,10 +146,9 @@ function checkCookieUserID(daysToExpire) {
 		return(1);
     } else if (sID == null){
         // Setting session-id (sessionID) if not set, and pushing session-id (sessionID) with user-id (deviceID) to database
-        sessionStorage.setItem("session-id", userID() + "-s");
         //$(document).ready(function(){
 		var deviceID = getCookie('user-id');
-		var sessionID = sessionStorage.getItem("session-id");
+		var sessionID = userID() + "-s";
 		setSessionCookie(sessionID);
 		if(deviceID != "" && sessionID != ""){
 			let xhttp = new XMLHttpRequest();
@@ -356,7 +354,6 @@ window.addEventListener('load', (event) => {
 	startDate = new Date();
 	let maxScroll = 0; 
 	
-	//const sessionID = sessionStorage.getItem("session-id");
 	const date = new Date().toISOString().split('T')[0];
 	const elapsed = 1; // can't be zero, so initial value is 1
 	const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
@@ -374,21 +371,27 @@ window.addEventListener('load', (event) => {
 		saveSession(date, elapsed, articleID, scrollY, lat, lon);
 	}).catch((err) => {
 		// If failed
-		console.error(err);
-		let lat = "0,0"; 
+		//console.log(err);
+		let lat = "0,0";
 		let lon = "0,0";
 		saveSession(date, elapsed, articleID, scrollY, lat, lon);
 	});
 
 	/* Updating maxScroll whenever scrolling is happening,
 	and updating elapsed and scrollY in database */
-	document.addEventListener('scroll', function() {
-		if(scrollPercentage() > maxScroll){
-			maxScroll = Math.round(scrollPercentage());
-		}
-		scrollY = maxScroll;
-		updateSession(scrollY);
-	});
+	var isScrolling;
+	window.addEventListener('scroll', function(event ) {
+		// Clear our timeout throughout the scroll
+		window.clearTimeout( isScrolling );
+		// Set a timeout to run after scrolling ends
+		isScrolling = setTimeout(function() {
+			if(scrollPercentage() > maxScroll){
+				maxScroll = Math.round(scrollPercentage());
+			}
+			scrollY = maxScroll;
+			updateSession(scrollY);
+		}, 66);
+	}, false);
 
 	/* Pushing updated elapsed time and scrollY to database, when switching tabs */
 	document.addEventListener('visibilitychange', function(){
