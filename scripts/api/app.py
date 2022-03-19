@@ -11,10 +11,8 @@ from flask_apispec.extension import FlaskApiSpec
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, doc
 
-# Database libraries
-from flask_mysqldb import MySQL
-from dotenv import load_dotenv
-import os
+from data import UserHistory
+
 
 # API
 app = Flask(__name__)  # Flask app instance initiated
@@ -27,7 +25,7 @@ app.config.update({
         openapi_version='3.0.0'
     ),
     'APISPEC_SWAGGER_URL': '/swagger/',  # URI to access API Doc JSON
-    'APISPEC_SWAGGER_UI_URL': '/swagger-ui/'  # URI to access UI of API Doc
+    'APISPEC_SWAGGER_UI_URL': '/swagger-ui/',  # URI to access UI of API Doc
 })
 
 
@@ -36,53 +34,40 @@ docs = FlaskApiSpec(app)
 
 # Defining the response schema of articles
 class article_schema(Schema):
-    deviceID = fields.Str(required=True)
-    articleID = fields.List(fields.Str())
+    articleID = fields.List(fields.String(), description='list of bazo ID\'s of articles read by user')
+    deviceID = fields.String(description='User ID set by cookie')
 
-# Defining RecommenderAPI 
-class RecommenderAPI(MethodResource, Resource):
-    # MySQL connection
-    load_dotenv()
-    app.config['MYSQL_HOST'] = os.environ.get('db-host')
-    app.config['MYSQL_USER'] = os.environ.get('db-user')
-    app.config['MYSQL_PASSWORD'] = os.environ.get('db-pass')
-    app.config['MYSQL_DB'] = os.environ.get('db-database')
-    db = MySQL(app)
-
-    # Connecting to cookie database
-    def sessions(self, deviceID: str):
-        '''
-        Function for getting sessionID's of a given user from cookie database
-        '''
-        cur = self.db.connection.cursor()
-        cur.execute(f'SELECT sessionID FROM session WHERE deviceID="{deviceID}";')
-        sessions = cur.fetchall()
-        cur.close()
-        return list(sum(sessions, ()))
-    
-    def articles(self, sessions: list):
-        '''
-        Function for getting articleID's of a users session from cookie database
-        '''
-        cur = self.db.connection.cursor()
-        cur.execute('SELECT articleID FROM sessionInfo WHERE sessionID IN {};'.format('(' + ', '.join(f'"{s}"' for s in sessions) + ')'))
-        articles = cur.fetchall()
-        cur.close()
-        return list(sum(articles, ()))
-
+class ContentBased(UserHistory, MethodResource, Resource):
     @doc(description='Get all articleID\'s of a specific users history', tags=['Content Based'])
-    @marshal_with(article_schema)  # marshalling
+    @marshal_with(article_schema) # marshalling
+    def get(self, deviceID: str):
+        '''
+            get:
+                description: 
+                responses:
+                    200:
+                description: 
+                content:
+                    application/json:
+                        schema: articleSchema
+        '''
+        articleIDs = self.articleIDs(deviceID)
+        return {'deviceID': deviceID, 'articleID': articleIDs}
+
+class CollaborativeFiltering(UserHistory, MethodResource, Resource):
+    @doc(description='Get all articleID\'s of a specific users history', tags=['Collaborative Filtering'])
+    @marshal_with(article_schema) # marshalling
     def get(self, deviceID: str):
         '''
         Get method represents a GET API method
         '''
-        sessionID = self.sessions(deviceID)
-        articleID = self.articles(sessionID)
-        #articleID = list(map(lambda x: self.articles(x), sessionID))
-        return {'deviceID': f'{deviceID}', 'articleID': articleID}
+        articleIDs = self.articleIDs(deviceID)
+        return {'deviceID': deviceID, 'articleID': articleIDs}
 
-api.add_resource(RecommenderAPI, '/articles/<string:deviceID>')
-docs.register(RecommenderAPI)
+api.add_resource(ContentBased, '/api/ContentBased/<string:deviceID>')
+api.add_resource(CollaborativeFiltering, '/api/CollabFiltering/<string:deviceID>')
+docs.register(ContentBased)
+docs.register(CollaborativeFiltering)
 
 if __name__ == '__main__':
     app.run(debug=True)
