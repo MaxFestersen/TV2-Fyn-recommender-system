@@ -5,6 +5,7 @@ from mysql.connector import MySQLConnection
 from dotenv import load_dotenv
 import os
 import requests
+import json
 
 class UserHistory:
 
@@ -95,3 +96,20 @@ class Bazo:
         '''
         r = requests.get(f'{self.url}/v1/articles/{articleID}')
         return r.json()['data']
+    
+    def listSections(self):
+        '''
+            listSections:
+                description: lists sections of tv2fyn and corresponding id's
+                inputs: 
+                    - self.url: url for public bazo api
+                returns:
+                    - dict with section names and uuid
+        '''
+        r = requests.get(f'{self.url}/v1/taxonomies/sections')
+        data = json.loads(r.content)['data']
+        name = list(map(lambda x: x['name'], data))
+        uuid = list(map(lambda x: x['uuid'], data))
+        return dict(zip(name, uuid))
+
+
