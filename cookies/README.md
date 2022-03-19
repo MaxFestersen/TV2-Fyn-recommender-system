@@ -1,4 +1,21 @@
-# Cookie & Database løsning
+# Cookie & Database Solution
+
+There are two approaches to implementing the cookie and database on a webserver.
+One way is to copy the contents of *public* to the webservers public directory i.e. /var/www/html/.
+This requires the php-engine i.e., apache2 to have the extension *mysqli*, and the database and tables created in mysql with *db.sql*.
+The config file *config/database.php* should be edited with the username and password of a user that has full privileges to the database.
+Furthermore, the directory *config* should be copied to the parent directory of the webservers public folder i.e. /var/www/config.
+
+Alternatively, the cookie and database can be implemented as an 'external' solution with Docker.
+This requires *Docker Engine* and *Docker Compose*: [Docker Engine](https://docs.docker.com/engine/install/ubuntu/), [Docker compose](https://docs.docker.com/compose/install/).
+With Docker a php-server and a mysql-server runs in softwarecontainers, a kind of lightweight modular virtual machine.
+Before the containers can be initatiated the directory *secrets* should be created, with a file *db_pass* that contains the wanted password for a mysql user *recommender*.
+This password will automatically be added both in the php container and the mysql container.
+To initate the containers use the shell command `docker-compose up -d` in the directory containing *docker-compose.yml*.
+
+Default settings is that the php container is exposed through port 80 (standard http) and the mysql container is exposed on port 3306 (standard db port).
+
+# Cookie & Databse løsning
 
 Cookie'en og databasen kan implementeres på en server på to måder. 
 Enten kan mappen *public* lægges i webserverens rodmappe f.eks. /var/www/html/ og /js/cookie.js integreres i hver .html fil.
