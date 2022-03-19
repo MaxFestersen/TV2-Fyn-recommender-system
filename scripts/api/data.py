@@ -95,5 +95,3 @@ class Bazo:
         '''
         r = requests.get(f'{self.url}/v1/articles/{articleID}')
         return r.json()['data']
-
-

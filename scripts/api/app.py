@@ -10,6 +10,7 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 from flask_apispec.extension import FlaskApiSpec
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, doc
+from waitress import serve
 
 from data import UserHistory
 
@@ -70,5 +71,6 @@ docs.register(ContentBased)
 docs.register(CollaborativeFiltering)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True) #development server
+    #serve(app, host='0.0.0.0', port=8080) #production server
     
