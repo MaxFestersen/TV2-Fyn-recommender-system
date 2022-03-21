@@ -6,6 +6,8 @@ from dotenv import load_dotenv
 import os
 import requests
 import json
+import pandas as pd
+from zmq import device
 
 class UserHistory:
 
@@ -56,6 +58,32 @@ class UserHistory:
         articleIDs = cur.fetchall()
         cur.close()
         return list(sum(articleIDs, ()))
+    
+    def interactions(self):
+        '''
+            interactions:
+                description: gets interactions between article (date, elapsed, articleID, scrollY) and deviceID
+                inputs: 
+                    - self.db: MYSQLConnection
+                returns:
+                    - interactions: pandas DataFrame
+                        - date
+                        - elapsed
+                        - articleID
+                        - scrollY
+                        - deviceID
+        '''
+
+        cur = self.db.cursor()
+        stmt = """SELECT sessionInfo.date, sessionInfo.elapsed, sessionInfo.articleID, sessionInfo.scrollY, session.deviceID
+                    FROM sessionInfo
+                    INNER JOIN session
+                    ON session.sessionID=sessionInfo.sessionID;"""
+        cur.execute(stmt)
+        interactions = cur.fetchall()
+        return pd.DataFrame(interactions, columns=['date', 'elapsed', 'articleID', 'scrollY', 'deviceID'])
+
+    
 
 class Bazo:
     
@@ -111,5 +139,3 @@ class Bazo:
         name = list(map(lambda x: x['name'], data))
         uuid = list(map(lambda x: x['uuid'], data))
         return dict(zip(name, uuid))
-
-
