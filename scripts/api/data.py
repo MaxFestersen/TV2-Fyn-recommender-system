@@ -52,9 +52,9 @@ class UserHistory:
                 returns:
                     - articleIDs: list of strings
         '''
-        sessionIDs = self.sessionIDs(deviceID)
         cur = self.db.cursor()
-        cur.execute('SELECT articleID FROM sessionInfo WHERE sessionID IN {};'.format('(' + ', '.join(f'"{s}"' for s in sessionIDs) + ')'))
+        stmt = f'SELECT articleID FROM sessionInfo WHERE sessionID IN (SELECT sessionID FROM session WHERE deviceID="{deviceID}");'
+        cur.execute(stmt)
         articleIDs = cur.fetchall()
         cur.close()
         return list(sum(articleIDs, ()))
@@ -73,7 +73,6 @@ class UserHistory:
                         - scrollY
                         - deviceID
         '''
-
         cur = self.db.cursor()
         stmt = """SELECT sessionInfo.date, sessionInfo.elapsed, sessionInfo.articleID, sessionInfo.scrollY, session.deviceID
                     FROM sessionInfo
