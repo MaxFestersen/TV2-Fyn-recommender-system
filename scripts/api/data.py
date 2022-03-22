@@ -7,7 +7,7 @@ import os
 import requests
 import json
 import pandas as pd
-from zmq import device
+#from zmq import device
 
 class Bazo():
     
@@ -36,7 +36,7 @@ class Bazo():
             r = requests.get(f'{self.url}/v1/articles')
         return r.json()['data']
     
-    def getArticle(self, articleID):
+    def getArticle(self, articleID: str):
         '''
             getArticle:
                 description: gets a specific article by articleID
@@ -81,6 +81,12 @@ class Bazo():
 
     def notArticleIDs(self):
         '''
+            notArticleIDs:
+                description: gets uuid's of pages that aren't articles i.e., sections, locations, front page etc.
+                input:
+                    - self.url: url for public bazo api
+                returns:
+                    - tuple of uuid's that aren't articles
         '''
         r = requests.get(f'{self.url}/v1/website')
         data = json.loads(r.content)['data']
@@ -99,6 +105,29 @@ class Bazo():
         uuid.extend(self.listLocations().values())
         uuid.extend(self.listSections().values())
         return tuple(uuid)
+    
+    def articleTitle(self, articleID: str):
+        '''
+            articleTitle:
+                description: gets titles comprised of 'trumpet' and 'title' fields in getArticle
+                input:
+                    - self.getArticle: function for getting article json data
+                returns:
+                    - title: str containing trumpet and title
+        '''
+        articleData = self.getArticle(articleID)
+        return articleData['trumpet'] + " " + articleData['title']
+
+    def articleText(self, articleID: str):
+        '''
+            articleText:
+                description: gets body text of articles from getArticle
+                input:
+                    - self.getArticle: function for getting article json data
+                returns:
+                    - text: str containing article body text
+        '''
+        pass
 
 class UserHistory(Bazo):
 
@@ -182,7 +211,7 @@ class UserHistory(Bazo):
         interactions = cur.fetchall()
         return pd.DataFrame(interactions, columns=['date', 'elapsed', 'articleID', 'scrollY', 'deviceID'])
     
-    def avgElapsed(self, _from, _to):
+    def avgElapsed(self, _from: str, _to: str):
         '''
             avgElapsed: 
                 description: computes the average time articles have been read by a user between two dates
@@ -205,7 +234,7 @@ class UserHistory(Bazo):
         avgElapsed = cur.fetchall()
         return pd.DataFrame(avgElapsed, columns=['articleID', 'avg_elapsed'])
     
-    def avgScroll(self, _from, _to):
+    def avgScroll(self, _from: str, _to: str):
         '''
             avgScroll: 
                 description: computes the average percent scrolled on articles between two dates
@@ -227,7 +256,12 @@ class UserHistory(Bazo):
         cur.execute(stmt)
         avgScrolled = cur.fetchall()
         return pd.DataFrame(avgScrolled, columns=['articleID', 'avg_scrolled'])
+    
+    def avgElapsedSection(self, _from: str, _to: str):
+        pass
 
+    def avgScrollSection(self, _from: str, _to: str):
+        pass
 
 
 class DataTransform(UserHistory, Bazo):
