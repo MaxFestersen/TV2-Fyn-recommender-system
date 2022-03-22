@@ -108,7 +108,7 @@ class UserHistory(Bazo):
                 description: Connects to cookie database using environment variables defined in .env, and initializes Bazo class
                 returns:
                     - self.db : MYSQLConnection
-                    - selff.notArticles: list of uuids that aren't articles
+                    - self.notArticles: list of uuids that aren't articles
         '''
         load_dotenv()
         self.db = MySQLConnection(
@@ -142,6 +142,7 @@ class UserHistory(Bazo):
                 description: gets articleID's across all of a users sessions from cookie database
                 inputs: 
                     - self.db: MYSQLConnection
+                    - self.notArticles: tuple of uuid's that aren't articles
                     - deviceID: str
                 returns:
                     - articleIDs: list of strings
@@ -162,6 +163,7 @@ class UserHistory(Bazo):
                 description: gets interactions between article (date, elapsed, articleID, scrollY) and deviceID
                 inputs: 
                     - self.db: MYSQLConnection
+                    - self.notArticles: tuple of uuid's that aren't articles
                 returns:
                     - interactions: pandas DataFrame
                         - date
@@ -180,3 +182,57 @@ class UserHistory(Bazo):
         interactions = cur.fetchall()
         return pd.DataFrame(interactions, columns=['date', 'elapsed', 'articleID', 'scrollY', 'deviceID'])
     
+    def avgElapsed(self, _from, _to):
+        '''
+            avgElapsed: 
+                description: computes the average time articles have been read by a user between two dates
+                inputs: 
+                    - self.db: MYSQLConnection
+                    - self.notArticles: tuple of uuid's that aren't articles
+                    - _from: str (date from which query range should start)
+                    - _to: str (date from which query range should end)
+                returns:
+                    - avgElapsed: pandas DataFrame
+                        - articleID: str
+                        - avg_elapsed: str time
+        '''
+        cur = self.db.cursor()
+        stmt = f"""SELECT articleID, SEC_TO_TIME(AVG(TIME_TO_SEC(elapsed))) FROM sessionInfo
+                    WHERE date BETWEEN "{_from}" AND "{_to}" AND
+                    articleID NOT IN {self.notArticles}
+                    GROUP BY articleID;"""
+        cur.execute(stmt)
+        avgElapsed = cur.fetchall()
+        return pd.DataFrame(avgElapsed, columns=['articleID', 'avg_elapsed'])
+    
+    def avgScroll(self, _from, _to):
+        '''
+            avgScroll: 
+                description: computes the average percent scrolled on articles between two dates
+                inputs:
+                    - self.db: MYSQLConnection
+                    - self.notArticles: tuple of uuid's that aren't articles
+                    - _from: str (date from which query range should start)
+                    - _to: str (date from which query range should end)
+                returns:
+                    - avgScrolled: pandas DataFrame
+                        - articleID: str
+                        - avg_scrolled: float
+        '''
+        cur = self.db.cursor()
+        stmt = f"""SELECT articleID, AVG(scrollY) AS avg_scrolled FROM sessionInfo
+                    WHERE date BETWEEN "{_from}" AND "{_to}" AND
+                    articleID NOT IN {self.notArticles}
+                    GROUP BY articleID;"""
+        cur.execute(stmt)
+        avgScrolled = cur.fetchall()
+        return pd.DataFrame(avgScrolled, columns=['articleID', 'avg_scrolled'])
+
+
+
+class DataTransform(UserHistory, Bazo):
+    '''
+    Class for datatransformations [todo]
+    '''
+    pass
+
