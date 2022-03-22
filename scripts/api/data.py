@@ -7,6 +7,7 @@ import os
 import requests
 import json
 import pandas as pd
+import re
 #from zmq import device
 
 class Bazo():
@@ -121,13 +122,16 @@ class Bazo():
     def articleText(self, articleID: str):
         '''
             articleText:
-                description: gets body text of articles from getArticle
+                description: gets body text of articles from getArticle and removes html tags
                 input:
                     - self.getArticle: function for getting article json data
                 returns:
                     - text: str containing article body text
         '''
-        pass
+        articleData = self.getArticle(articleID)
+        articleText = [_['content']['html'] for _ in articleData['content'] if _['type']=="Text"]
+        return re.sub('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});', ' ', ''.join(articleText))
+
 
 class UserHistory(Bazo):
 
