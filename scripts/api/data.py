@@ -9,6 +9,7 @@ import json
 import pandas as pd
 import re
 import time
+from datetime import datetime
 #from zmq import device
 
 class Bazo():
@@ -228,8 +229,9 @@ class UserHistory(Bazo):
                     WHERE sessionInfo.articleID NOT IN {self.notArticles};"""
         cur.execute(stmt)
         interactions = cur.fetchall()
-        return pd.DataFrame(interactions, columns=['date', 'elapsed', 'articleID', 'scrollY', 'deviceID'])
-    
+        interactions = pd.DataFrame(interactions, columns=['date', 'elapsed', 'articleID', 'scrollY', 'deviceID'])
+        return interactions
+
     def avgElapsed(self, _from: str, _to: str):
         '''
             avgElapsed: 
@@ -341,7 +343,7 @@ class DataTransform(UserHistory, Bazo):
         interactions = self.interactions()
         interactions['articleLength'] = list(map(self.articleLength, interactions['articleID']))
         interactions = interactions.dropna().reset_index(drop=True)
-        interactions['affinity'] = (interactions['elapsed'].dt.total_seconds()/(interactions['articleLength']/2))*interactions['scrollY']
+        interactions['affinity'] = (interactions['elapsed'].dt.total_seconds()/(interactions['articleLength']/2))*interactions['scrollY']+1
         interactions = interactions.drop(['elapsed', 'scrollY', 'articleLength'], axis=1)
-        return interactions
+        return interactions.astype({'date':'datetime64', 'articleID':'string', 'deviceID':'string','affinity':'float32'})
 
