@@ -8,6 +8,7 @@ import requests
 import json
 import pandas as pd
 import re
+import time
 #from zmq import device
 
 class Bazo():
@@ -47,8 +48,11 @@ class Bazo():
                 returns:
                     - json data of specific article
         '''
-        r = requests.get(f'{self.url}/v1/articles/{articleID}')
-        return r.json()['data']
+        try:
+            r = requests.get(f'{self.url}/v1/articles/{articleID}')
+            return r.json()['data']
+        except:
+            pass
     
     def listSections(self):
         '''
@@ -79,6 +83,13 @@ class Bazo():
         name = [_['name'] for _ in data]
         uuid = [_['uuid'] for _ in data]
         return dict(zip(name, uuid))
+    
+    def listLiveblogs(self):
+        r = requests.get(f'{self.url}/v1/liveblogs')
+        data = json.loads(r.content)['data']
+        name = [_['title'] for _ in data]
+        uuid = [_['uuid'] for _ in data]
+        return dict(zip(name, uuid))
 
     def notArticleIDs(self):
         '''
@@ -105,6 +116,7 @@ class Bazo():
         uuid = [_ for _ in [helper(x) for _, x in data.items()] if _]
         uuid.extend(self.listLocations().values())
         uuid.extend(self.listSections().values())
+        uuid.extend(self.listLiveblogs().values())
         return tuple(uuid)
     
     def articleTitle(self, articleID: str):
@@ -129,8 +141,11 @@ class Bazo():
                     - text: str containing article body text
         '''
         articleData = self.getArticle(articleID)
-        articleText = [_['content']['html'] for _ in articleData['content'] if _['type']=="Text"]
-        return re.sub('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});', ' ', ''.join(articleText))
+        if articleData:
+            articleText = [_['content']['html'] for _ in articleData['content'] if _['type']=="Text"]
+            return re.sub('<.*?>|&([a-z0-9]+|#[0-9]{1,6}|#x[0-9a-f]{1,6});', ' ', ''.join(articleText))
+        else:
+            return None
 
 
 class UserHistory(Bazo):
@@ -189,7 +204,7 @@ class UserHistory(Bazo):
         articleIDs = cur.fetchall()
         cur.close()
         return list(sum(articleIDs, ()))
-    
+
     def interactions(self):
         '''
             interactions:
@@ -267,10 +282,66 @@ class UserHistory(Bazo):
     def avgScrollSection(self, _from: str, _to: str):
         pass
 
-
 class DataTransform(UserHistory, Bazo):
     '''
     Class for datatransformations [todo]
     '''
-    pass
+    def __init__(self):
+        '''
+            __init__:
+                description: initializes superclasses UserHistory and Bazo
+
+        '''
+        super(DataTransform, self).__init__()
+    
+    def articleLength(self, articleID: str):
+        '''
+            articleLength:
+                description: does a database lookup to see if articleLength has been computed before and returns it, else computes and inserts into database and returns it.
+                input: 
+                    - self.db: MYSQLConnection
+                    - self.articleText
+                    - articleID
+                returns:
+                    - int: length of article in characters.
+        '''
+        cur = self.db.cursor()
+        stmt = f"""SELECT * from articleLength WHERE articleID="{articleID}"; """
+        cur.execute(stmt)
+        articleLengths = cur.fetchall()
+        articleLengths = pd.DataFrame(articleLengths, columns=['articleID', 'length'])
+        if len(articleLengths) > 0:
+            return articleLengths['length'].item()
+        else:
+            articleText = self.articleText(articleID)
+            if articleText:
+                length = len(articleText)
+                stmt = f"""INSERT INTO articleLength(articleID, length) VALUES("{articleID}", {length});"""
+                cur.execute(stmt)
+                self.db.commit()
+                cur.close()
+                return length
+            else:
+                stmt = f"""INSERT INTO articleLength(articleID, length) VALUES("{articleID}", NULL);"""
+                cur.execute(stmt)
+                self.db.commit()
+                cur.close()
+                return None
+    
+    def computeAffinity(self):
+        '''
+            computeAffinity:
+                description: computes an "affinity" score based on articleLength, elapsed and scrollY
+                inputs:
+                    - self.interactions: interactions between deviceIDs and articles
+                    - self.articleLength: method for getting articleLength
+                returns:
+                    - affinity: pandas DataFrame (date, articleID, deviceID, affinity)
+        '''
+        interactions = self.interactions()
+        interactions['articleLength'] = list(map(self.articleLength, interactions['articleID']))
+        interactions = interactions.dropna().reset_index(drop=True)
+        interactions['affinity'] = (interactions['elapsed'].dt.total_seconds()/(interactions['articleLength']/2))*interactions['scrollY']
+        interactions = interactions.drop(['elapsed', 'scrollY', 'articleLength'], axis=1)
+        return interactions
 
