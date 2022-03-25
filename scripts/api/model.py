@@ -26,8 +26,6 @@ from recommenders.models.sar import SAR
 
 data = DataTransform().computeAffinity()
 
-data['affinity'] = data['affinity'].astype(np.float32)
-
 train, test = python_stratified_split(data, ratio=0.75, col_user='deviceID', col_item='articleID')
 
 logging.basicConfig(level=logging.DEBUG, 
@@ -39,6 +37,8 @@ model = SAR(
     col_rating='affinity',
     col_timestamp='date',
     similarity_type='jaccard',
+    time_decay_coefficient=7,
+    timedecay_formula=True,
     normalize=True
 )
 
@@ -51,4 +51,3 @@ with Timer() as test_time:
     top_k = model.recommend_k_items(test, remove_seen=True)
 
 print("Took {} seconds for prediction.".format(test_time.interval))
-

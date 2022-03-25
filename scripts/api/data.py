@@ -7,6 +7,7 @@ import os
 import requests
 import json
 import pandas as pd
+import numpy as np
 import re
 import time
 from datetime import datetime
@@ -222,7 +223,7 @@ class UserHistory(Bazo):
                         - deviceID
         '''
         cur = self.db.cursor()
-        stmt = f"""SELECT sessionInfo.date, sessionInfo.elapsed, sessionInfo.articleID, sessionInfo.scrollY, session.deviceID
+        stmt = f"""SELECT UNIX_TIMESTAMP(sessionInfo.date), sessionInfo.elapsed, sessionInfo.articleID, sessionInfo.scrollY, session.deviceID
                     FROM sessionInfo
                     INNER JOIN session
                     ON session.sessionID=sessionInfo.sessionID
@@ -345,5 +346,4 @@ class DataTransform(UserHistory, Bazo):
         interactions = interactions.dropna().reset_index(drop=True)
         interactions['affinity'] = (interactions['elapsed'].dt.total_seconds()/(interactions['articleLength']/2))*interactions['scrollY']+1
         interactions = interactions.drop(['elapsed', 'scrollY', 'articleLength'], axis=1)
-        return interactions.astype({'date':'datetime64', 'articleID':'string', 'deviceID':'string','affinity':'float32'})
-
+        return interactions #.astype({'date':'Timestamp', 'articleID':'string', 'deviceID':'string','affinity':'float32'})
