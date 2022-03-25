@@ -5,7 +5,7 @@
 from mysql.connector import MySQLConnection
 from dotenv import load_dotenv
 import os
-from numpy import float16, float32
+from numpy import float16
 import requests
 import asyncio
 import json
@@ -344,7 +344,7 @@ class allUsers():
                     WHERE sessionInfo.articleID NOT IN {self.notArticles};"""
         df = self.db.getTable(stmt, columns=['date', 'articleID', 'deviceID', 'affinity'])
         df = df.dropna().reset_index(drop=True)
-        df.affinity = df.affinity.astype(float32)
+        df.affinity = df.affinity.astype(float16)
         return df
 
 class User():
