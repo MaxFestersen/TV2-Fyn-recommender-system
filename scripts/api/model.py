@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
 import logging
-import numpy as np
+from data_optimized import allUsers
 from data import DataTransform
 from sklearn.preprocessing import minmax_scale
 from recommenders.utils.python_utils import binarize
@@ -24,7 +23,8 @@ from recommenders.models.sar import SAR
 
 ## Following example https://github.com/microsoft/recommenders/blob/c4435a9af5836f3d472cfa44b312841a8121923c/examples/00_quick_start/sar_movielens.ipynb
 
-data = DataTransform().computeAffinity()
+data = allUsers().interactions()
+# data = DataTransform().computeAffinity()
 
 train, test = python_stratified_split(data, ratio=0.75, col_user='deviceID', col_item='articleID')
 
