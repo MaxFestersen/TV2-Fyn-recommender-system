@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 # Libraries
+from dataclasses import MISSING
+from http.cookiejar import Cookie
 from mysql.connector import MySQLConnection
 from dotenv import load_dotenv
 import os
@@ -15,14 +17,18 @@ import re
 import pandas as pd
 
 class Bazo():
-    def __init__(self):
+    def __init__(self, articleIDs: list=None):
         '''
             __init__:
                 description: establishes a connection to public bazo api
+                inputs: 
+                    - articleIDs: list (optional article IDs to fetch data from)
                 returns:
                     - self.url: url for public bazo api
         '''
         self.url = 'https://public.fyn.bazo.dk/v1'
+        self.articleIDs = articleIDs
+        self.articleData = self.getArticles()
 
     def getParallel(self, endpoint, ids: list):
         '''
@@ -141,7 +147,7 @@ class Bazo():
         uuid.extend(self.listLiveblogs().values())
         return tuple(uuid)
 
-    def getArticles(self, articleIDs: list):
+    def getArticles(self):
         '''
             getArticle:
                 description: gets a list of articles by articleID
@@ -151,9 +157,11 @@ class Bazo():
                 returns:
                     - list of json data for specific articles
         '''
-        return self.getParallel('/articles/', articleIDs)
+        if self.articleIDs:
+            return self.getParallel('/articles/', self.articleIDs)
+        return None
 
-    def articleTitles(self, articleIDs: list):
+    def articleTitles(self):
         '''
             articleTitle:
                 description: gets titles comprised of 'trumpet' and 'title' fields in getArticle
@@ -162,10 +170,10 @@ class Bazo():
                 returns:
                     - title: str containing trumpet and title
         '''
-        articleData = self.getArticles(articleIDs)
+        articleData = self.articleData
         return dict(zip(articleData.keys(), [str(_['trumpet'] or '') + str(_['title'] or '') for _ in [_['data'] for _ in articleData.values()]]))
 
-    def articleTexts(self, articleID: list):
+    def articleTexts(self):
         '''
             articleText:
                 description: gets body text of articles from getArticle and removes html tags 
@@ -174,7 +182,7 @@ class Bazo():
                 returns:
                     - text: str containing article body text
         '''
-        articleData = self.getArticles(articleID)
+        articleData = self.articleData
 
         def extractCleanText(json):
             # checks for content in json, loops through it to find content of type text and removes html tags
@@ -184,9 +192,8 @@ class Bazo():
             return None
         if articleData:
             articleText = dict(zip(articleData.keys(), list(map(extractCleanText, [_['data'] for _ in articleData.values()]))))
-            articleTitles = dict(zip(articleData.keys(), [str(_['trumpet'] or '') + str(_['title'] or '') for _ in [_['data'] for _ in articleData.values()]]))
-            return articleText, articleTitles
-        return None, None
+            return articleText
+        return None
     
      
 class CookieDatabase():
@@ -203,8 +210,7 @@ class CookieDatabase():
             user=os.environ.get('MYSQL_USER'),
             password=os.environ.get('MYSQL_PASS'),
             database=os.environ.get('MYSQL_DB'))
-            self.Bazo = Bazo()
-            self.notArticles = self.Bazo.notArticleIDs()
+            self.notArticles = Bazo().notArticleIDs
     
     def getTable(self, stmt: str, columns: list):
         '''
@@ -256,7 +262,9 @@ class CookieDatabase():
                     AND articleID NOT IN {self.notArticles};"""
         MISSING_IDS = self.getList(stmt)
         if MISSING_IDS:
-            articleTexts, articleTitles = self.Bazo.articleTexts(MISSING_IDS)
+            b = Bazo(MISSING_IDS)
+            articleTexts = b.articleTexts()
+            articleTitles = b.articleTitles()
             if articleTexts:
                 lengths = {k:len(v) for (k,v) in articleTexts.items()}
                 cur = self.db.cursor()
@@ -268,7 +276,7 @@ class CookieDatabase():
                 return print("Updated")
         return print("Nothing to update")
         
-class allUsers():
+class allUsers(CookieDatabase):
     def __init__(self):
         '''
             __init__:
@@ -277,11 +285,11 @@ class allUsers():
                     - self.db: CookieDatabase class
                     - self.notArticles: list of uuids that aren't articles
         '''
-        self.db = CookieDatabase()
+        CookieDatabase.__init__(self)
         self.notArticles = Bazo().notArticleIDs()
-        self.db.updateArticles()
+        self.updateArticles()
 
-    def avgElapsed(self, _from: str, _to: str):
+    def avgElapsed(self, _from: str, _to: str, titles: bool):
         '''
             avgElapsed: 
                 description: computes the average time articles have been read by a user between two dates
@@ -295,13 +303,21 @@ class allUsers():
                         - articleID: str
                         - avg_elapsed: str time
         '''
+        if titles:
+            stmt = f"""SELECT articles.title, AVG(TIME_TO_SEC(sessionInfo.elapsed)), STD(TIME_TO_SEC(elapsed)) FROM sessionInfo
+                    INNER JOIN articles
+                        ON sessionInfo.articleID=articles.articleID
+                    WHERE date BETWEEN "{_from}" AND "{_to}" 
+                    GROUP BY articles.title;
+                    """
+            return self.getTable(stmt, columns=['title', 'avg_elapsed', 'std_elapsed'])
         stmt = f"""SELECT articleID, AVG(TIME_TO_SEC(elapsed)), STD(TIME_TO_SEC(elapsed)) FROM sessionInfo
                     WHERE date BETWEEN "{_from}" AND "{_to}" AND
                     articleID NOT IN {self.notArticles}
                     GROUP BY articleID;"""
-        return self.db.getTable(stmt, columns=['articleID', 'avg_elapsed', 'std_elapsed'])
+        return self.getTable(stmt, columns=['articleID', 'avg_elapsed', 'std_elapsed'])
 
-    def avgScroll(self, _from: str, _to: str):
+    def avgScroll(self, _from: str, _to: str, titles: bool):
         '''
             avgScroll: 
                 description: computes the average percent scrolled on articles between two dates
@@ -315,11 +331,19 @@ class allUsers():
                         - articleID: str
                         - avg_scrolled: float
         '''
+        if titles:
+            stmt = f"""SELECT articles.title, AVG(sessionInfo.scrollY), STD(sessionInfo.scrollY) FROM sessionInfo
+                    INNER JOIN articles
+                        ON sessionInfo.articleID=articles.articleID
+                    WHERE date BETWEEN "{_from}" AND "{_to}" 
+                    GROUP BY articles.title;
+                    """
+            return self.getTable(stmt, columns=['title', 'avg_scrolled', 'std_scrolled'])
         stmt = f"""SELECT articleID, AVG(scrollY), STD(scrollY) FROM sessionInfo
                     WHERE date BETWEEN "{_from}" AND "{_to}" AND
                     articleID NOT IN {self.notArticles}
                     GROUP BY articleID;"""
-        return self.db.getTable(stmt, columns=['articleID', 'avg_scrolled', 'std_scrolled'])
+        return self.getTable(stmt, columns=['articleID', 'avg_scrolled', 'std_scrolled'])
 
     def interactions(self):
         '''
@@ -343,23 +367,27 @@ class allUsers():
                     INNER JOIN articles
                         ON sessionInfo.articleID=articles.articleID
                     WHERE sessionInfo.articleID NOT IN {self.notArticles};"""
-        df = self.db.getTable(stmt, columns=['date', 'articleID', 'deviceID', 'title', 'affinity'])
+        df = self.getTable(stmt, columns=['date', 'articleID', 'deviceID', 'title', 'affinity'])
         df = df.dropna().reset_index(drop=True)
         df.affinity = df.affinity.astype(float32)
         return df
 
-class User():
-    def __init__(self):
+class User(CookieDatabase):
+    def __init__(self, deviceID: str):
         '''
             __init__:
                 description: initializes Bazo and CookieDatabase classes and calls notArticleIDs() from Bazo
+                inputs:
+                    - deviceID: str (deviceID to lookup)
                 returns:
                     - self.notArticles: list of uuids that aren't articles
+                    - self.deviceID: str
         '''
-        self.db = CookieDatabase()
+        CookieDatabase.__init__(self)
         self.notArticles = Bazo().notArticleIDs()
+        self.deviceID = deviceID
 
-    def sessionIDs(self, deviceID: str):
+    def sessionIDs(self):
         '''
             sessionIDs:
                 description: gets sessionID's of a given user from cookie database
@@ -369,10 +397,10 @@ class User():
                 returns:
                     - sessionIDs: list of strings
         '''
-        stmt = f'SELECT sessionID FROM session WHERE deviceID="{deviceID}";'
-        return self.db.getList(stmt)
+        stmt = f'SELECT sessionID FROM session WHERE deviceID="{self.deviceID}";'
+        return self.getList(stmt)
 
-    def articleIDs(self, deviceID: str):
+    def articleIDs(self):
         '''
             articleIDs:
                 description: gets articleID's across all of a users sessions from cookie database
@@ -385,11 +413,11 @@ class User():
         '''
         stmt = f"""SELECT articleID FROM sessionInfo 
         WHERE sessionID IN 
-        (SELECT sessionID FROM session WHERE deviceID="{deviceID}")
+        (SELECT sessionID FROM session WHERE deviceID="{self.deviceID}")
         AND articleID NOT IN {self.notArticles};"""
-        return self.db.getList(stmt)
+        return self.getList(stmt)
 
-    def interactions(self, deviceID: str):
+    def interactions(self):
         '''
             interactions:
                 description: gets interactions between article (date, elapsed, articleID, scrollY) and deviceID
@@ -411,8 +439,8 @@ class User():
                     INNER JOIN articles
                         ON sessionInfo.articleID=articles.articleID
                     WHERE sessionInfo.articleID NOT IN {self.notArticles} 
-                    AND session.deviceID="{deviceID}";"""
-        df = self.db.getTable(stmt, columns=['date', 'articleID', 'deviceID', 'title', 'affinity'])
+                    AND session.deviceID="{self.deviceID}";"""
+        df = self.getTable(stmt, columns=['date', 'articleID', 'deviceID', 'title', 'affinity'])
         df = df.dropna().reset_index(drop=True)
         df.affinity = df.affinity.astype(float32)
         return df
