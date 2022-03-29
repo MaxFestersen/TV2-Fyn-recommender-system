@@ -31,11 +31,9 @@ FOREIGN KEY (sessionID) REFERENCES session(sessionID)
 ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS tv2fyn.articleLength(
+CREATE TABLE IF NOT EXISTS tv2fyn.articles(
 articleID VARCHAR(255) NOT NULL,
-length INT,
-PRIMARY KEY (articleID),
-FOREIGN KEY (articleID) REFERENCES sessionInfo(articleID)
+title VARCHAR(255) NOT NULL,
+length INT
 );
 
-INSERT INTO tv2fyn.articleLength(articleID, length) VALUES('placeholder', 123);

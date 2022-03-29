@@ -5,7 +5,8 @@
 from mysql.connector import MySQLConnection
 from dotenv import load_dotenv
 import os
-from numpy import float16
+from numpy import float32, int32
+
 import requests
 import asyncio
 import json
@@ -162,12 +163,12 @@ class Bazo():
                     - title: str containing trumpet and title
         '''
         articleData = self.getArticles(articleIDs)
-        return dict(zip(articleData.keys(), [_['trumpet'] + _['title'] for _ in [_['data'] for _ in articleData.values()]]))
+        return dict(zip(articleData.keys(), [str(_['trumpet'] or '') + str(_['title'] or '') for _ in [_['data'] for _ in articleData.values()]]))
 
     def articleTexts(self, articleID: list):
         '''
             articleText:
-                description: gets body text of articles from getArticle and removes html tags
+                description: gets body text of articles from getArticle and removes html tags 
                 input:
                     - self.getArticle: function for getting article json data
                 returns:
@@ -183,8 +184,9 @@ class Bazo():
             return None
         if articleData:
             articleText = dict(zip(articleData.keys(), list(map(extractCleanText, [_['data'] for _ in articleData.values()]))))
-            return articleText
-        return None
+            articleTitles = dict(zip(articleData.keys(), [str(_['trumpet'] or '') + str(_['title'] or '') for _ in [_['data'] for _ in articleData.values()]]))
+            return articleText, articleTitles
+        return None, None
     
      
 class CookieDatabase():
@@ -237,7 +239,7 @@ class CookieDatabase():
         cur.close()
         return list(sum(values, ()))
     
-    def updateArticleLength(self):
+    def updateArticles(self):
         '''
             updateArticleLength:
                 description: checks if there are articleID's in sessionInfo not present in articleLength and requests text of missing articleID's.
@@ -249,18 +251,17 @@ class CookieDatabase():
                 returns:
                     - prints whether articleLength was updated or not  
         '''
-
         stmt = f"""SELECT DISTINCT(articleID) FROM sessionInfo
-                    WHERE articleID NOT IN (SELECT articleID FROM articleLength)
+                    WHERE articleID NOT IN (SELECT articleID FROM articles)
                     AND articleID NOT IN {self.notArticles};"""
         MISSING_IDS = self.getList(stmt)
         if MISSING_IDS:
-            articleTexts = self.Bazo.articleTexts(MISSING_IDS)
+            articleTexts, articleTitles = self.Bazo.articleTexts(MISSING_IDS)
             if articleTexts:
                 lengths = {k:len(v) for (k,v) in articleTexts.items()}
                 cur = self.db.cursor()
-                stmt = "INSERT INTO articleLength(articleID, length) VALUES {};".format(",".join("(%s, %s)" for _ in lengths.items()))
-                rows = [row for rows in lengths.items() for row in rows]
+                stmt = "INSERT INTO articles(articleID, title, length) VALUES {};".format(",".join("(%s, %s, %s)" for _ in lengths.items()))
+                rows = list(sum([(k, articleTitles.get(k), lengths.get(k)) for k in articleTitles.keys()], ()))
                 cur.execute(stmt, rows)
                 self.db.commit()
                 cur.close()
@@ -278,7 +279,7 @@ class allUsers():
         '''
         self.db = CookieDatabase()
         self.notArticles = Bazo().notArticleIDs()
-        self.db.updateArticleLength()
+        self.db.updateArticles()
 
     def avgElapsed(self, _from: str, _to: str):
         '''
@@ -334,17 +335,17 @@ class allUsers():
                         - deviceID
                         - affinity
         '''
-        stmt = f"""SELECT UNIX_TIMESTAMP(sessionInfo.date), sessionInfo.articleID, session.deviceID, 
-                    (TIME_TO_SEC(sessionInfo.elapsed)/(articleLength.length/2))*(sessionInfo.scrollY+1) AS affinity
+        stmt = f"""SELECT UNIX_TIMESTAMP(sessionInfo.date), sessionInfo.articleID, session.deviceID, articles.title,  
+                    (TIME_TO_SEC(sessionInfo.elapsed)/(articles.length/2))*(sessionInfo.scrollY+1) AS affinity
                     FROM sessionInfo
                     INNER JOIN session
                         ON session.sessionID=sessionInfo.sessionID
-                    INNER JOIN articleLength
-                        ON sessionInfo.articleID=articleLength.articleID
+                    INNER JOIN articles
+                        ON sessionInfo.articleID=articles.articleID
                     WHERE sessionInfo.articleID NOT IN {self.notArticles};"""
-        df = self.db.getTable(stmt, columns=['date', 'articleID', 'deviceID', 'affinity'])
+        df = self.db.getTable(stmt, columns=['date', 'articleID', 'deviceID', 'title', 'affinity'])
         df = df.dropna().reset_index(drop=True)
-        df.affinity = df.affinity.astype(float16)
+        df.affinity = df.affinity.astype(float32)
         return df
 
 class User():
@@ -402,16 +403,16 @@ class User():
                         - deviceID
                         - affinity
         '''
-        stmt = f"""SELECT UNIX_TIMESTAMP(sessionInfo.date), sessionInfo.articleID, session.deviceID,
-                    (TIME_TO_SEC(sessionInfo.elapsed)/(articleLength.length/2))*(sessionInfo.scrollY+1) AS affinity
+        stmt = f"""SELECT UNIX_TIMESTAMP(sessionInfo.date), sessionInfo.articleID, session.deviceID, articles.title,
+                    (TIME_TO_SEC(sessionInfo.elapsed)/(articles.length/2))*(sessionInfo.scrollY+1) AS affinity
                     FROM sessionInfo
                     INNER JOIN session
                         ON session.sessionID=sessionInfo.sessionID
-                    INNER JOIN articleLength
-                        ON sessionInfo.articleID=articleLength.articleID
+                    INNER JOIN articles
+                        ON sessionInfo.articleID=articles.articleID
                     WHERE sessionInfo.articleID NOT IN {self.notArticles} 
                     AND session.deviceID="{deviceID}";"""
-        df = self.db.getTable(stmt, columns=['date', 'articleID', 'deviceID', 'affinity'])
+        df = self.db.getTable(stmt, columns=['date', 'articleID', 'deviceID', 'title', 'affinity'])
         df = df.dropna().reset_index(drop=True)
-        df.affinity = df.affinity.astype(float16)
+        df.affinity = df.affinity.astype(float32)
         return df
