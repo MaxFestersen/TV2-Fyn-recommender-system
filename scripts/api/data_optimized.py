@@ -287,7 +287,6 @@ class allUsers(CookieDatabase):
         '''
         CookieDatabase.__init__(self)
         self.notArticles = Bazo().notArticleIDs()
-        self.updateArticles()
 
     def avgElapsed(self, _from: str, _to: str, titles: bool):
         '''
@@ -304,18 +303,18 @@ class allUsers(CookieDatabase):
                         - avg_elapsed: str time
         '''
         if titles:
-            stmt = f"""SELECT articles.title, AVG(TIME_TO_SEC(sessionInfo.elapsed)), STD(TIME_TO_SEC(elapsed)) FROM sessionInfo
+            stmt = f"""SELECT articles.title, AVG(TIME_TO_SEC(sessionInfo.elapsed)), STD(TIME_TO_SEC(sessionInfo.elapsed)), COUNT(sessionInfo.sessionID) FROM sessionInfo
                     INNER JOIN articles
                         ON sessionInfo.articleID=articles.articleID
                     WHERE date BETWEEN "{_from}" AND "{_to}" 
                     GROUP BY articles.title;
                     """
-            return self.getTable(stmt, columns=['title', 'avg_elapsed', 'std_elapsed'])
-        stmt = f"""SELECT articleID, AVG(TIME_TO_SEC(elapsed)), STD(TIME_TO_SEC(elapsed)) FROM sessionInfo
+            return self.getTable(stmt, columns=['title', 'avg_elapsed', 'std_elapsed', 'n_users'])
+        stmt = f"""SELECT articleID, AVG(TIME_TO_SEC(elapsed)), STD(TIME_TO_SEC(sessionInfo.elapsed)), COUNT(sessionInfo.elapsed) FROM sessionInfo
                     WHERE date BETWEEN "{_from}" AND "{_to}" AND
                     articleID NOT IN {self.notArticles}
                     GROUP BY articleID;"""
-        return self.getTable(stmt, columns=['articleID', 'avg_elapsed', 'std_elapsed'])
+        return self.getTable(stmt, columns=['articleID', 'avg_elapsed', 'std_elapsed', 'n_users'])
 
     def avgScroll(self, _from: str, _to: str, titles: bool):
         '''
@@ -332,18 +331,18 @@ class allUsers(CookieDatabase):
                         - avg_scrolled: float
         '''
         if titles:
-            stmt = f"""SELECT articles.title, AVG(sessionInfo.scrollY), STD(sessionInfo.scrollY) FROM sessionInfo
+            stmt = f"""SELECT articles.title, AVG(sessionInfo.scrollY), STD(sessionInfo.scrollY), COUNT(sessionInfo.scrollY) FROM sessionInfo
                     INNER JOIN articles
                         ON sessionInfo.articleID=articles.articleID
                     WHERE date BETWEEN "{_from}" AND "{_to}" 
                     GROUP BY articles.title;
                     """
-            return self.getTable(stmt, columns=['title', 'avg_scrolled', 'std_scrolled'])
-        stmt = f"""SELECT articleID, AVG(scrollY), STD(scrollY) FROM sessionInfo
+            return self.getTable(stmt, columns=['title', 'avg_scrolled', 'std_scrolled', 'n_users'])
+        stmt = f"""SELECT articleID, AVG(scrollY), STD(scrollY), COUNT(sessionInfo.scrollY) FROM sessionInfo
                     WHERE date BETWEEN "{_from}" AND "{_to}" AND
                     articleID NOT IN {self.notArticles}
                     GROUP BY articleID;"""
-        return self.getTable(stmt, columns=['articleID', 'avg_scrolled', 'std_scrolled'])
+        return self.getTable(stmt, columns=['articleID', 'avg_scrolled', 'std_scrolled', 'n_users'])
 
     def interactions(self):
         '''
@@ -359,6 +358,7 @@ class allUsers(CookieDatabase):
                         - deviceID
                         - affinity
         '''
+        self.updateArticles()
         stmt = f"""SELECT UNIX_TIMESTAMP(sessionInfo.date), sessionInfo.articleID, session.deviceID, articles.title,  
                     (TIME_TO_SEC(sessionInfo.elapsed)/(articles.length/2))*(sessionInfo.scrollY+1) AS affinity
                     FROM sessionInfo
