@@ -74,7 +74,10 @@ class CollaborativeFiltering(CookieDatabase, MethodResource, Resource):
             get:
                 description: Get method for CollaborativeFiltering
         '''
-        return dict(self.getRecommendations(deviceID)[:5])
+        u = User(deviceID)
+        articleIDs = u.articleIDs()
+        recs = self.getRecommendations(deviceID)
+        return {k: v for k,v in recs if k not in articleIDs}
 
 class avgScrollAPI(allUsers, MethodResource, Resource):
     @doc(description='Get average scroll of users per articleID or title', tags=['Evaluation'])
