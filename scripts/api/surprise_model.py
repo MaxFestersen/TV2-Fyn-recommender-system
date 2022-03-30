@@ -26,4 +26,4 @@ model = gs.best_estimator['rmse']
 trainset = data.build_full_trainset()
 model.fit(trainset)
 
-dump.dump('SVDpp_model', model) # saving fitted model
+dump.dump('./SVDpp_model', model) # saving fitted model
