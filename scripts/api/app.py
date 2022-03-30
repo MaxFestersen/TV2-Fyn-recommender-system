@@ -2,8 +2,9 @@
 # -*- coding: utf-8 -*-
 
 # API libraries
-from flask import Flask
-from flask_restful import Resource, Api
+from datetime import date
+from flask import Flask, request, Response
+from flask_restful import Resource, Api, reqparse
 from apispec import APISpec
 from marshmallow import Schema, fields
 from apispec.ext.marshmallow import MarshmallowPlugin
@@ -12,8 +13,8 @@ from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, doc
 from waitress import serve
 
-from data import UserHistory
-
+from data_optimized import allUsers
+from data_optimized import User
 
 # API
 app = Flask(__name__)  # Flask app instance initiated
@@ -29,16 +30,21 @@ app.config.update({
     'APISPEC_SWAGGER_UI_URL': '/swagger-ui/',  # URI to access UI of API Doc
 })
 
-
 # Initiating the swagger docs
 docs = FlaskApiSpec(app)
+
+parser = reqparse.RequestParser()
+parser.add_argument('from', type=str, required=True)
+parser.add_argument('to', type=str, default=str(date.today()), required=False)
+parser.add_argument('titles', type=bool, default=False, required=False)
+
 
 # Defining the response schema of articles
 class article_schema(Schema):
     articleID = fields.List(fields.String(), description='list of bazo ID\'s of articles read by user')
     deviceID = fields.String(description='User ID set by cookie')
 
-class ContentBased(UserHistory, MethodResource, Resource):
+class ContentBased(MethodResource, Resource):
     @doc(description='Get all articleID\'s of a specific users history', tags=['Content Based'])
     @marshal_with(article_schema) # marshalling
     def get(self, deviceID: str):
@@ -52,21 +58,54 @@ class ContentBased(UserHistory, MethodResource, Resource):
                     application/json:
                         schema: articleSchema
         '''
-        articleIDs = self.articleIDs(deviceID)
-        return {'deviceID': deviceID, 'articleID': articleIDs}
+        pass
 
-class CollaborativeFiltering(UserHistory, MethodResource, Resource):
+class CollaborativeFiltering(MethodResource, Resource):
     @doc(description='Get all articleID\'s of a specific users history', tags=['Collaborative Filtering'])
     @marshal_with(article_schema) # marshalling
     def get(self, deviceID: str):
         '''
-        Get method represents a GET API method
+            get:
+                description: Get method for CollaborativeFiltering
         '''
-        articleIDs = self.articleIDs(deviceID)
-        return {'deviceID': deviceID, 'articleID': articleIDs}
+        pass
+
+class avgScrollAPI(allUsers, MethodResource, Resource):
+    @doc(description='Get average scroll of users per articleID or title', tags=['Evaluation'])
+    def get(self):
+        '''
+            get:
+                description: Get method for avgScroll
+        '''
+        args = parser.parse_args()
+        _from = args['from']
+        _to = args['to']
+        titles = args['titles']
+        a = allUsers()
+        df = a.avgScroll(_from, _to, titles)
+        return Response(df.to_json(orient='records'), mimetype='application/json')
+
+class avgElapsedAPI(allUsers, MethodResource, Resource):
+    @doc(description='Get average elapsed time of users per articleID or title', tags=['Evaluation'])
+    def get(self):
+        '''
+            get:
+                description: Get method for avgScroll
+        '''
+        args = parser.parse_args()
+        _from = args['from']
+        _to = args['to']
+        titles = args['titles']
+        a = allUsers()
+        df = a.avgElapsed(_from, _to, titles)
+        return Response(df.to_json(orient='records'), mimetype='application/json')
 
 api.add_resource(ContentBased, '/api/ContentBased/<string:deviceID>')
 api.add_resource(CollaborativeFiltering, '/api/CollabFiltering/<string:deviceID>')
+api.add_resource(avgScrollAPI, '/api/avgscroll')
+api.add_resource(avgElapsedAPI, '/api/avgelapsed')
+docs.register(avgScrollAPI)
+docs.register(avgElapsedAPI)
 docs.register(ContentBased)
 docs.register(CollaborativeFiltering)
 
