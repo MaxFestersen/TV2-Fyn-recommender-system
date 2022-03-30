@@ -58,14 +58,14 @@ class ContentBased(MethodResource, Resource):
         '''
         pass
 
-class CollaborativeFiltering(CookieDatabase, MethodResource, Resource):
+class CollaborativeFiltering(MethodResource, Resource):
     
     model, _ = dump.load('./SVDpp_model')
+    articleIDs = CookieDatabase().allArticleIDs()
 
     def getRecommendations(self, deviceID: str):
-        articleIDs = self.allArticleIDs()
-        ratings = [self.model.predict(uid=deviceID, iid=iid).est for iid in articleIDs]
-        predictions = dict(zip(articleIDs, ratings))
+        ratings = [self.model.predict(uid=deviceID, iid=iid).est for iid in self.articleIDs]
+        predictions = dict(zip(self.articleIDs, ratings))
         return sorted(predictions.items(), key=lambda x:x[1], reverse=True)
         
     @doc(description='Get all articleID\'s of a specific users history', tags=['Collaborative Filtering'])
