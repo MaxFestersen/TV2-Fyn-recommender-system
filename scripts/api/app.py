@@ -12,9 +12,8 @@ from flask_apispec.extension import FlaskApiSpec
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, doc
 from waitress import serve
-
-from data_optimized import allUsers
-from data_optimized import User
+from surprise import dump
+from data_optimized import allUsers, User, CookieDatabase
 
 # API
 app = Flask(__name__)  # Flask app instance initiated
@@ -38,7 +37,6 @@ parser.add_argument('from', type=str, required=True)
 parser.add_argument('to', type=str, default=str(date.today()), required=False)
 parser.add_argument('titles', type=bool, default=False, required=False)
 
-
 # Defining the response schema of articles
 class article_schema(Schema):
     articleID = fields.List(fields.String(), description='list of bazo ID\'s of articles read by user')
@@ -60,15 +58,23 @@ class ContentBased(MethodResource, Resource):
         '''
         pass
 
-class CollaborativeFiltering(MethodResource, Resource):
+class CollaborativeFiltering(CookieDatabase, MethodResource, Resource):
+    
+    model, _ = dump.load('./SVDpp_model')
+
+    def getRecommendations(self, deviceID: str):
+        articleIDs = self.allArticleIDs()
+        ratings = [self.model.predict(uid=deviceID, iid=iid).est for iid in articleIDs]
+        predictions = dict(zip(articleIDs, ratings))
+        return sorted(predictions.items(), key=lambda x:x[1], reverse=True)
+        
     @doc(description='Get all articleID\'s of a specific users history', tags=['Collaborative Filtering'])
-    @marshal_with(article_schema) # marshalling
     def get(self, deviceID: str):
         '''
             get:
                 description: Get method for CollaborativeFiltering
         '''
-        pass
+        return dict(self.getRecommendations(deviceID)[:5])
 
 class avgScrollAPI(allUsers, MethodResource, Resource):
     @doc(description='Get average scroll of users per articleID or title', tags=['Evaluation'])
