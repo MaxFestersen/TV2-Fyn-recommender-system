@@ -275,6 +275,10 @@ class CookieDatabase():
                 cur.close()
                 return print("Updated")
         return print("Nothing to update")
+    
+    def allArticleIDs(self):
+        stmt = """SELECT articleID FROM articles WHERE length > 0;"""
+        return self.getList(stmt)
         
 class allUsers(CookieDatabase):
     def __init__(self):
@@ -444,3 +448,4 @@ class User(CookieDatabase):
         df = df.dropna().reset_index(drop=True)
         df.affinity = df.affinity.astype(float32)
         return df
+    
