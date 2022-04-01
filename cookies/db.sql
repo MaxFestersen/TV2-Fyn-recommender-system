@@ -34,6 +34,9 @@ ON DELETE CASCADE
 CREATE TABLE IF NOT EXISTS tv2fyn.articles(
 articleID VARCHAR(255) NOT NULL,
 title VARCHAR(255) NOT NULL,
-length INT
+length INT,
+releaseDate DATETIME,
+section VARCHAR(255),
+location VARCHAR(255)
 );
 

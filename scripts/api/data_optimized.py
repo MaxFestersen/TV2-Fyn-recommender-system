@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 # Libraries
-from dataclasses import MISSING
-from http.cookiejar import Cookie
+from datetime import datetime
 from mysql.connector import MySQLConnection
 from dotenv import load_dotenv
 import os
@@ -166,7 +165,7 @@ class Bazo():
             articleTitle:
                 description: gets titles comprised of 'trumpet' and 'title' fields in getArticle
                 input:
-                    - self.getArticle: function for getting article json data
+                    - self.articleData
                 returns:
                     - title: str containing trumpet and title
         '''
@@ -178,7 +177,7 @@ class Bazo():
             articleText:
                 description: gets body text of articles from getArticle and removes html tags 
                 input:
-                    - self.getArticle: function for getting article json data
+                    - self.articleData
                 returns:
                     - text: str containing article body text
         '''
@@ -195,7 +194,43 @@ class Bazo():
             return articleText
         return None
     
+    def releaseDates(self):
+        '''
+            realeaseDate:
+                description: gets the release date/s of articles in self.articleData
+                input: 
+                    -self.articleData
+                returns:
+                    - str: timestamp
+        '''
+        articleData = self.articleData
+        return dict(zip(articleData.keys(), [datetime.strptime(_['date_published_at'][:-8], '%Y-%m-%dT%H:%M:%S') for _ in [_['data'] for _ in articleData.values()]]))
      
+    def articleSections(self):
+        '''
+            articleSection:
+                description: gets the section/s of articles in self.articleData
+                input: 
+                    -self.articleData
+                returns:
+                    - str: section name
+        '''
+        articleData = self.articleData
+        return dict(zip(articleData.keys(), [_['primary_section']['name'] for _ in [_['data'] for _ in articleData.values()]]))
+
+    def articleLocations(self):
+        '''
+            articleLocation:
+                description: gets the location/s of articles in self.articleData
+                input:
+                    - self.articleData
+                returns:
+                    - str: location name
+        '''
+        articleData = self.articleData
+        return dict(zip(articleData.keys(), [_['primary_location']['name'] for _ in [_['data'] for _ in articleData.values()]]))
+
+
 class CookieDatabase():
     def __init__(self):
             '''
@@ -265,11 +300,17 @@ class CookieDatabase():
             b = Bazo(MISSING_IDS)
             articleTexts = b.articleTexts()
             articleTitles = b.articleTitles()
+            releaseDates = b.releaseDates()
+            articleSections = b.articleSections()
+            articleLocations = b.articleLocations()
+
             if articleTexts:
                 lengths = {k:len(v) for (k,v) in articleTexts.items()}
                 cur = self.db.cursor()
-                stmt = "INSERT INTO articles(articleID, title, length) VALUES {};".format(",".join("(%s, %s, %s)" for _ in lengths.items()))
-                rows = list(sum([(k, articleTitles.get(k), lengths.get(k)) for k in articleTitles.keys()], ()))
+                stmt = "INSERT INTO articles(articleID, title, length, releaseDate, section, location) VALUES {};".format(",".join("(%s, %s, %s, %s, %s, %s)" \
+                    for _ in lengths.items()))
+                rows = list(sum([(k, articleTitles.get(k), lengths.get(k), releaseDates.get(k), articleSections.get(k), articleLocations.get(k))\
+                     for k in articleTitles.keys()], ()))
                 cur.execute(stmt, rows)
                 self.db.commit()
                 cur.close()
@@ -279,6 +320,10 @@ class CookieDatabase():
     def allArticleIDs(self):
         stmt = """SELECT articleID FROM articles WHERE length > 0;"""
         return self.getList(stmt)
+    
+    def articles(self):
+        stmt = """SELECT * FROM articles WHERE length > 0;"""
+        return self.getTable(stmt, columns=['articleID', 'title', 'length', 'releaseDate', 'section', 'location'])
         
 class allUsers(CookieDatabase):
     def __init__(self):
