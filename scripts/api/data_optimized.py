@@ -322,7 +322,7 @@ class CookieDatabase():
         return self.getList(stmt)
     
     def articles(self):
-        stmt = """SELECT * FROM articles WHERE length > 0;"""
+        stmt = """SELECT articleID, title, length, UNIX_TIMESTAMP(releaseDate), section, location FROM articles WHERE length > 0;"""
         return self.getTable(stmt, columns=['articleID', 'title', 'length', 'releaseDate', 'section', 'location'])
         
 class allUsers(CookieDatabase):
@@ -405,10 +405,12 @@ class allUsers(CookieDatabase):
                         - date
                         - articleID
                         - deviceID
+                        - title
+                        - releaseDate
                         - affinity
         '''
         self.updateArticles()
-        stmt = f"""SELECT UNIX_TIMESTAMP(sessionInfo.date), sessionInfo.articleID, session.deviceID, articles.title,  
+        stmt = f"""SELECT UNIX_TIMESTAMP(sessionInfo.date), sessionInfo.articleID, session.deviceID, articles.title, UNIX_TIMESTAMP(articles.releaseDate), 
                     (TIME_TO_SEC(sessionInfo.elapsed)/(articles.length/2))*(sessionInfo.scrollY+1) AS affinity
                     FROM sessionInfo
                     INNER JOIN session
@@ -416,7 +418,7 @@ class allUsers(CookieDatabase):
                     INNER JOIN articles
                         ON sessionInfo.articleID=articles.articleID
                     WHERE sessionInfo.articleID NOT IN {self.notArticles};"""
-        df = self.getTable(stmt, columns=['date', 'articleID', 'deviceID', 'title', 'affinity'])
+        df = self.getTable(stmt, columns=['date', 'articleID', 'deviceID', 'title', 'releaseDate', 'affinity'])
         df = df.dropna().reset_index(drop=True)
         df.affinity = df.affinity.astype(float32)
         return df
