@@ -11,9 +11,12 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 from flask_apispec.extension import FlaskApiSpec
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, doc
+from numpy import float16
 from waitress import serve
 from surprise import dump
 from data_optimized import allUsers, User, CookieDatabase
+import tensorflow as tf
+import os
 
 # API
 app = Flask(__name__)  # Flask app instance initiated
@@ -79,6 +82,17 @@ class CollaborativeFiltering(MethodResource, Resource):
         recs = self.getRecommendations(deviceID)
         return {k: v for k,v in recs if k not in articleIDs}
 
+class DCN(MethodResource, Resource):
+    os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+    model = tf.saved_model.load('DCN')
+
+    @doc(description='Get Deep Cross Network recommendations for a specific user', tags=['Deep Cross Network'])
+    def get(self, deviceID: str):
+        u = User(deviceID)
+        data = dict(u.antiInteractions())
+        recs = self.model(data)
+        return dict(zip(data['articleID'], tf.squeeze(recs).numpy().astype(str)))
+
 class avgScrollAPI(allUsers, MethodResource, Resource):
     @doc(description='Get average scroll of users per articleID or title', tags=['Evaluation'])
     def get(self):
@@ -111,12 +125,14 @@ class avgElapsedAPI(allUsers, MethodResource, Resource):
 
 api.add_resource(ContentBased, '/api/ContentBased/<string:deviceID>')
 api.add_resource(CollaborativeFiltering, '/api/CollabFiltering/<string:deviceID>')
+api.add_resource(DCN, '/api/DCN/<string:deviceID>')
 api.add_resource(avgScrollAPI, '/api/avgscroll')
 api.add_resource(avgElapsedAPI, '/api/avgelapsed')
 docs.register(avgScrollAPI)
 docs.register(avgElapsedAPI)
 docs.register(ContentBased)
 docs.register(CollaborativeFiltering)
+docs.register(DCN)
 
 if __name__ == '__main__':
     app.run(debug=True) #development server

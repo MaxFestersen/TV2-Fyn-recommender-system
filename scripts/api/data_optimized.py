@@ -14,6 +14,7 @@ import json
 import aiohttp
 import re
 import pandas as pd
+import time
 
 class Bazo():
     def __init__(self, articleIDs: list=None):
@@ -410,15 +411,16 @@ class allUsers(CookieDatabase):
                         - affinity
         '''
         self.updateArticles()
-        stmt = f"""SELECT UNIX_TIMESTAMP(sessionInfo.date), sessionInfo.articleID, session.deviceID, articles.title, UNIX_TIMESTAMP(articles.releaseDate), 
-                    (TIME_TO_SEC(sessionInfo.elapsed)/(articles.length/2))*(sessionInfo.scrollY+1) AS affinity
+        stmt = f"""SELECT DAYOFWEEK(sessionInfo.date), TIME_TO_SEC(sessionInfo.date), UNIX_TIMESTAMP(sessionInfo.date),
+                    sessionInfo.articleID, session.deviceID, articles.title, UNIX_TIMESTAMP(articles.releaseDate), 
+                    (TIME_TO_SEC(sessionInfo.elapsed)*(sessionInfo.scrollY+1))/(articles.length) AS affinity
                     FROM sessionInfo
                     INNER JOIN session
                         ON session.sessionID=sessionInfo.sessionID
                     INNER JOIN articles
                         ON sessionInfo.articleID=articles.articleID
                     WHERE sessionInfo.articleID NOT IN {self.notArticles};"""
-        df = self.getTable(stmt, columns=['date', 'articleID', 'deviceID', 'title', 'releaseDate', 'affinity'])
+        df = self.getTable(stmt, columns=['dayOfWeek', 'time', 'date', 'articleID', 'deviceID', 'title', 'releaseDate', 'affinity'])
         df = df.dropna().reset_index(drop=True)
         df.affinity = df.affinity.astype(float32)
         return df
@@ -494,5 +496,17 @@ class User(CookieDatabase):
         df = self.getTable(stmt, columns=['date', 'articleID', 'deviceID', 'title', 'affinity'])
         df = df.dropna().reset_index(drop=True)
         df.affinity = df.affinity.astype(float32)
+        return df
+    
+    def antiInteractions(self):
+        stmt = f"""SELECT DAYOFWEEK(CURDATE()), TIME_TO_SEC(CURTIME()), articleID, title, UNIX_TIMESTAMP(releaseDate)
+                    FROM articles
+                    WHERE articleID NOT IN (SELECT articleID FROM sessionInfo
+                                            INNER JOIN session
+                                                ON session.sessionID=sessionInfo.sessionID
+                                                WHERE session.deviceID="{self.deviceID}");"""
+        df = self.getTable(stmt, columns=['dayOfWeek', 'time', 'articleID', 'title', 'releaseDate'])
+        df = df.dropna().reset_index(drop=True)
+        df['deviceID'] = self.deviceID
         return df
     
