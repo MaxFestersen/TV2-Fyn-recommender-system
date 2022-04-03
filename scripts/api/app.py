@@ -83,6 +83,7 @@ class CollaborativeFiltering(MethodResource, Resource):
         return {k: v for k,v in recs if k not in articleIDs}
 
 class DCN(MethodResource, Resource):
+    os.environ['TF_XLA_FLAGS'] = '--tf_xla_cpu_global_jit'
     os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
     model = tf.saved_model.load('DCN')
 
