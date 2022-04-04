@@ -3,7 +3,7 @@
 
 # API libraries
 from datetime import date
-from flask import Flask, request, Response
+from flask import Flask, Response
 from flask_restful import Resource, Api, reqparse
 from apispec import APISpec
 from marshmallow import Schema, fields
@@ -14,8 +14,8 @@ from flask_apispec import marshal_with, doc
 from waitress import serve
 from surprise import dump
 from data_optimized import allUsers, User, CookieDatabase
-import tensorflow as tf
-import os
+import requests
+import json
 
 # API
 app = Flask(__name__)  # Flask app instance initiated
@@ -80,18 +80,16 @@ class CollaborativeFiltering(MethodResource, Resource):
         articleIDs = u.articleIDs()
         recs = self.getRecommendations(deviceID)
         return {k: v for k,v in recs if k not in articleIDs}
+import operator
 
 class DCN(MethodResource, Resource):
-    os.environ['TF_XLA_FLAGS'] = '--tf_xla_cpu_global_jit'
-    os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
-    model = tf.saved_model.load('DCN')
-
     @doc(description='Get Deep Cross Network recommendations for a specific user', tags=['Deep Cross Network'])
     def get(self, deviceID: str):
         u = User(deviceID)
-        data = dict(u.antiInteractions())
-        recs = self.model(data)
-        return dict(zip(data['article_id'], tf.squeeze(recs).numpy().astype(str)))
+        data = u.antiInteractions()
+        r = requests.post('http://localhost:8501/v1/models/DCN:predict', json.dumps({"signature_name": "serving_default", "instances": data.to_dict('records')}))
+        pred = json.loads(r.content.decode('utf-8'))
+        return dict(zip(data['article_id'], sum(pred['predictions'], [])))
 
 class avgScrollAPI(allUsers, MethodResource, Resource):
     @doc(description='Get average scroll of users per articleID or title', tags=['Evaluation'])

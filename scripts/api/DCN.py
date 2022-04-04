@@ -177,4 +177,4 @@ model.fit(cached_train, epochs=3)
 
 model.evaluate(cached_test, return_dict=True)
 
-tf.saved_model.save(model, 'DCN')
+tf.saved_model.save(model, 'tensorflow-serving/models/DCN/2')
