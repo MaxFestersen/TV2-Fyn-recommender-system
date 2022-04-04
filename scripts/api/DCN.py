@@ -5,19 +5,24 @@ import tensorflow_recommenders as tfrs
 import numpy as np
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import StringLookup, IntegerLookup, Embedding, Dense, Discretization, Normalization, TextVectorization, GlobalAveragePooling1D
+import os
+
+os.environ['TF_XLA_FLAGS'] = '--tf_xla_cpu_global_jit'
 
 interactions = allUsers().interactions()
 
 interactions = tf.data.Dataset.from_tensor_slices(dict(interactions))
 
 interactions = interactions.map(lambda x: {
-    'dayOfWeek': x['dayOfWeek'],
+    'day_of_week': x['day_of_week'],
     'time': x['time'],
-    'articleID': x['articleID'],
+    'device_id': x['device_id'],
+    'article_id': x['article_id'],
     'title': x['title'],
-    'releaseDate': x['releaseDate'],
+    'section': x['section'],
+    'location': x['location'],
+    'release_date': x['release_date'],
     'affinity': x['affinity'],
-    'deviceID': x['deviceID']
 })
 
 n_inter = len(interactions)
@@ -27,8 +32,8 @@ shuffled = interactions.shuffle(n_inter, seed=42, reshuffle_each_iteration=False
 train = shuffled.take(int(n_inter*0.8))
 test = shuffled.skip(int(n_inter*0.8)).take(int(n_inter*0.2))
 
-cat_features = ['dayOfWeek', 'articleID', 'deviceID', 'title']
-cont_features = ['time', 'releaseDate']
+cat_features = ['day_of_week', 'article_id', 'device_id', 'title', 'section', 'location']
+cont_features = ['time', 'release_date']
 vocabularies = {}
 
 for feature in cat_features:
@@ -42,20 +47,12 @@ for feature in cont_features:
     )
     vocabularies[feature] = [cont, cont_bucket]
 
-# feature_dict = {
-#     'str_features': ['articleID', 'deviceID'],
-#     'int_features': ['dayOfWeek'],
-#     'text_features': ['title'],
-#     'cont_features': ['time', 'releaseDate'],
-#     'disc_features': ['time', 'releaseDate']
-# }
-
 feature_dict = {
-    'str_features': ['articleID', 'deviceID'],
-    'int_features': ['dayOfWeek'],
+    'str_features': ['article_id', 'device_id', 'section', 'location', 'section', 'location'],
+    'int_features': ['day_of_week'],
     'text_features': ['title'],
-    'cont_features': [],
-    'disc_features': ['time', 'releaseDate']
+    'cont_features': ['time', 'release_date'],
+    'disc_features': ['time', 'release_date']
 }
 
 class DCN(tfrs.Model):

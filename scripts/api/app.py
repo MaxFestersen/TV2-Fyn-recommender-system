@@ -11,7 +11,6 @@ from apispec.ext.marshmallow import MarshmallowPlugin
 from flask_apispec.extension import FlaskApiSpec
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, doc
-from numpy import float16
 from waitress import serve
 from surprise import dump
 from data_optimized import allUsers, User, CookieDatabase
@@ -92,7 +91,7 @@ class DCN(MethodResource, Resource):
         u = User(deviceID)
         data = dict(u.antiInteractions())
         recs = self.model(data)
-        return dict(zip(data['articleID'], tf.squeeze(recs).numpy().astype(str)))
+        return dict(zip(data['article_id'], tf.squeeze(recs).numpy().astype(str)))
 
 class avgScrollAPI(allUsers, MethodResource, Resource):
     @doc(description='Get average scroll of users per articleID or title', tags=['Evaluation'])
