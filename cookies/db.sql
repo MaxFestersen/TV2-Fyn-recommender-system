@@ -37,6 +37,7 @@ title VARCHAR(255) NOT NULL,
 length INT,
 releaseDate DATETIME,
 section VARCHAR(255),
-location VARCHAR(255)
+location VARCHAR(255),
+PRIMARY KEY(articleID)
 );
 
