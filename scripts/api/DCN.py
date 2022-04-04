@@ -1,4 +1,3 @@
-from typing import Dict, Text
 from data_optimized import allUsers
 import tensorflow as tf
 import tensorflow_recommenders as tfrs
