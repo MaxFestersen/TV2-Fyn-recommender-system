@@ -202,7 +202,7 @@ function checkCookieUserID(daysToExpire) {
 	- https://www.w3schools.com/html/html5_geolocation.asp
 	- https://tutorialmeta.com/question/javascript-pass-geolocation-as-string-variable
 */
-function getLocation() {
+/*function getLocation() {
 	// Promise reults or serve rejection
     return new Promise((resolve, reject) => {
 		// Check if geolocation is available
@@ -216,7 +216,7 @@ function getLocation() {
             return reject("Geolocation is not supported by this browser.");
         }
     })
-}
+}*/
 
 /* Function for saving session info at first page load */
 function saveSession(elapsed, articleID, scrollY, lat, lon){
@@ -368,7 +368,7 @@ window.addEventListener('load', (event) => {
 	const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
 	let scrollY = maxScroll;
 
-	(async function() {
+	/*(async function() {
 		pos = await getLocation();
 		dis = await checkCookieUserID(daysToExpire);
 	})().then(() => {
@@ -380,11 +380,11 @@ window.addEventListener('load', (event) => {
 		saveSession(elapsed, articleID, scrollY, lat, lon);
 	}).catch((err) => {
 		// If failed
-		//console.log(err);
+		//console.log(err);*/
 		let lat = "0,0";
 		let lon = "0,0";
 		saveSession(elapsed, articleID, scrollY, lat, lon);
-	});
+	//});
 
 	/* Updating maxScroll whenever scrolling is happening,
 	and updating elapsed and scrollY in database */
