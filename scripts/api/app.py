@@ -73,11 +73,10 @@ class CollaborativeFiltering(MethodResource, Resource):
 
 class DCN(MethodResource, Resource):
     @doc(description='Get Deep Cross Network recommendations for a specific user', tags=['Deep Cross Network'])
-    @marshal_with(article_schema) # marshalling
     def get(self, deviceID: str):
         u = User(deviceID)
         data = u.antiInteractions()
-        r = requests.post('http://DCN:8501/v1/models/DCN:predict', json.dumps({"signature_name": "serving_default", "instances": data.to_dict('records')}))
+        r = requests.post('http://0.0.0.0:8501/v1/models/DCN:predict', json.dumps({"signature_name": "serving_default", "instances": data.to_dict('records')}))
         pred = json.loads(r.content.decode('utf-8'))
         return dict(zip(data['article_id'], sum(pred['predictions'], [])))
 
