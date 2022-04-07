@@ -18,8 +18,19 @@ function checkSessionCookie(){
 	return((document.cookie.match(/^(?:.*;)?\s*SessionCookie\s*=\s*([^;]+)(?:.*)?$/)||[,null])[1]) // Returns
 }
 
+function getCookie(name) {
+	var nameEQ = name + "=";
+	var ca = document.cookie.split(';');
+	for(var i=0;i < ca.length;i++) {
+		var c = ca[i];
+		while (c.charAt(0)==' ') c = c.substring(1,c.length);
+		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
+	}
+	return null;
+}
 
-
+//let CookieConsent = getCookie("CookieConsent").replace('{','').replace('}','').split("%2C").find(function(o){return o.match("preferences")}).split(":")[1] == "true";
+if(getCookie("CookieConsent") && getCookie("CookieConsent").replace('{','').replace('}','').split("%2C").find(function(o){return o.match("preferences")}).split(":")[1] == "true"){
 /* userID is a string that consists of number of miliseconds since 1/1-1970 and a random 3 character integer */
 function userID() {
     var date = Date.now()
@@ -404,3 +415,4 @@ window.addEventListener('load', (event) => {
 		updateSession(scrollY);
 	});
 });
+}
