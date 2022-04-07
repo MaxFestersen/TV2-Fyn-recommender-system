@@ -368,6 +368,7 @@ window.addEventListener('load', (event) => {
 	const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
 	let scrollY = maxScroll;
 
+	checkCookieuserID(daysToExpire);
 	/*(async function() {
 		pos = await getLocation();
 		dis = await checkCookieUserID(daysToExpire);
