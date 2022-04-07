@@ -1,57 +1,46 @@
 /* function for setting cookies*/
-function setCookie(name,value,days) {
-    var expires = "";
+function sdu_1_setCookie(name,value,days) {
+    let expires = "";
     if (days) {
-        var date = new Date();
+        var  date = new Date();
         date.setTime(date.getTime() + (days*24*60*60*1000));
         expires = "; expires=" + date.toUTCString();
     }
     document.cookie = name + "=" + (value || "")  + expires + "; path=/; samesite=strict; secure";
 }
 
-function setSessionCookie(value){
+function sdu_1_setSessionCookie(value){
     document.cookie = "SessionCookie=" + (value || "") + "; path=/; samesite=strict; secure";
 }
 
-function checkSessionCookie(){
+function sdu_1_checkSessionCookie(){
 	// Returns cookie value or null
 	return((document.cookie.match(/^(?:.*;)?\s*SessionCookie\s*=\s*([^;]+)(?:.*)?$/)||[,null])[1]) // Returns
 }
 
-function getCookie(name) {
-	var nameEQ = name + "=";
-	var ca = document.cookie.split(';');
+/* function for getting cookie value, returns null if none set for a name*/ 
+function sdu_1_getCookie(name) {
+	let nameEQ = name + "=";
+	let ca = document.cookie.split(';');
 	for(var i=0;i < ca.length;i++) {
-		var c = ca[i];
+		let c = ca[i];
 		while (c.charAt(0)==' ') c = c.substring(1,c.length);
 		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
 	}
 	return null;
 }
 
-//let CookieConsent = getCookie("CookieConsent").replace('{','').replace('}','').split("%2C").find(function(o){return o.match("preferences")}).split(":")[1] == "true";
-if(getCookie("CookieConsent") && getCookie("CookieConsent").replace('{','').replace('}','').split("%2C").find(function(o){return o.match("preferences")}).split(":")[1] == "true"){
-/* userID is a string that consists of number of miliseconds since 1/1-1970 and a random 3 character integer */
-function userID() {
-    var date = Date.now()
-    var random = Math.floor(Math.random() * 1000)
+//let CookieConsent = sdu_1_getCookie("CookieConsent").replace('{','').replace('}','').split("%2C").find(function(o){return o.match("preferences")}).split(":")[1] == "true";
+if(sdu_1_getCookie("CookieConsent") && sdu_1_getCookie("CookieConsent").replace('{','').replace('}','').split("%2C").find(function(o){return o.match("preferences")}).split(":")[1] == "true"){
+/* sdu_1_userID is a string that consists of number of miliseconds since 1/1-1970 and a random 3 character integer */
+function sdu_1_userID() {
+    let date = Date.now()
+    let random = Math.floor(Math.random() * 1000)
     return date + "-" + random
 }
 
-/* function for getting cookie value, returns null if none set for a name*/ 
-function getCookie(name) {
-    var nameEQ = name + "=";
-    var ca = document.cookie.split(';');
-    for(var i=0;i < ca.length;i++) {
-        var c = ca[i];
-        while (c.charAt(0)==' ') c = c.substring(1,c.length);
-        if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-    }
-    return null;
-}
-
-function getOS() {
-    var OSName = "Unknown OS";
+function sdu_1_getOS() {
+    let OSName = "Unknown OS";
     if (navigator.userAgent.indexOf("Win") != -1) OSName = "Windows";
     if (navigator.userAgent.indexOf("Mac") != -1) OSName = "Macintosh";
     if (navigator.userAgent.indexOf("Linux") != -1) OSName = "Linux";
@@ -60,9 +49,9 @@ function getOS() {
     return OSName;
 }
 
-function getBrowser() {
+function sdu_1_getBrowser() {
 	// inspired by https://codepedia.info/detect-browser-in-javascript
-	var browserName = (function (agent) {
+	let browserName = (function (agent) {
 		switch(true) {
             case agent.indexOf("edge") > -1: return "MS Edge";
             case agent.indexOf("edg/") > -1: return "Edge ( chromium based)";
@@ -78,24 +67,24 @@ function getBrowser() {
 }
 
 /* function for checking if user-id is set, and if not sets it*/
-function checkCookieUserID(daysToExpire) {
-    let uID = getCookie('user-id');
-    let sID = checkSessionCookie();
+function sdu_1_checkCookieuserID(daysToExpire) {
+    let uID = sdu_1_getCookie('user-id');
+    let sID = sdu_1_checkSessionCookie();
     if (uID == null) {
        // If no user cookie is set, both user cookie and session id is set.
-        setCookie("user-id", userID(), daysToExpire);
+        sdu_1_setCookie("user-id", sdu_1_userID(), daysToExpire);
 		if(sID == null){
-			var sessionID = userID() + "-s";
-			setSessionCookie(sessionID);
+			var sessionID = sdu_1_userID() + "-s";
+			sdu_1_setSessionCookie(sessionID);
 		} else{
 			var sessionID = sID;
 		}
         // Pushing user-id (deviceID) and session-id (sessionID) to database 
-		var deviceID = getCookie('user-id');
-		var screenWidth = screen.width;
-		var screenHeight = screen.height;
-		var deviceOS = getOS();
-		var deviceVendor = getBrowser();
+		let deviceID = sdu_1_getCookie('user-id');
+		let screenWidth = screen.width;
+		let screenHeight = screen.height;
+		let deviceOS = sdu_1_getOS();
+		let deviceVendor = sdu_1_getBrowser();
 		if(deviceID != "" && screenWidth != "" && screenHeight != "" && sessionID != ""){
 			let xhttp = new XMLHttpRequest();
 			xhttp.open("POST", fullUrl + "php/device.php", true);
@@ -108,19 +97,19 @@ function checkCookieUserID(daysToExpire) {
 			xhttp.addEventListener( 'load', function(event) {
 				if(!xhttp.responseText.includes("Error") && !xhttp.responseText.includes("<br/>")){
 					// Succes
-					console.log('checkCookieUserID succes');
+					console.log('sdu_1_checkCookieuserID succes');
 					//console.error(xhttp.responseText);
 					//console.log(deviceID, screenHeight, screenWidth, deviceOS);
 				} else{
 					// Error
-					console.log('checkCookieUserID error');
+					console.log('sdu_1_checkCookieuserID error');
 					console.error(xhttp.responseText);
 				}
 			});
 
 			// Define what happens in case of error
 			xhttp.addEventListener( 'error', function(event) {
-				console.log('checkCookieUserID server error');
+				console.log('sdu_1_checkCookieuserID server error');
 				console.error(xhttp.responseText);
 			});
 
@@ -136,18 +125,18 @@ function checkCookieUserID(daysToExpire) {
 			xhttp2.addEventListener( 'load', function(event) {
 				if(!xhttp2.responseText.includes("Error") && !xhttp.responseText.includes("<br/>")){
 					// Succes
-					console.log('checkCookieUserID second succes');
+					console.log('sdu_1_checkCookieuserID second succes');
 					//console.log(deviceID, sessionID);
 				} else{
 					// Error
-					console.log('checkCookieUserID second error');
+					console.log('sdu_1_checkCookieuserID second error');
 					console.error(xhttp2.responseText);
 				}
 			});
 			
 			// Define what happens in case of error
 			xhttp2.addEventListener( 'error', function(event) {
-				console.log('checkCookieUserID second server error');
+				console.log('sdu_1_checkCookieuserID second server error');
 				console.error(xhttp2.responseText);
 			});
 			
@@ -157,9 +146,9 @@ function checkCookieUserID(daysToExpire) {
     } else if (sID == null){
         // Setting session-id (sessionID) if not set, and pushing session-id (sessionID) with user-id (deviceID) to database
         //$(document).ready(function(){
-		var deviceID = getCookie('user-id');
-		var sessionID = userID() + "-s";
-		setSessionCookie(sessionID);
+		let deviceID = sdu_1_getCookie('user-id');
+		let sessionID = sdu_1_userID() + "-s";
+		sdu_1_setSessionCookie(sessionID);
 		if(deviceID != "" && sessionID != ""){
 			let xhttp = new XMLHttpRequest();
 			xhttp.open("POST", fullUrl + "php/session.php", true);
@@ -171,18 +160,18 @@ function checkCookieUserID(daysToExpire) {
 			xhttp.addEventListener( 'load', function(event) {
 				if(!xhttp.responseText.includes("Error") && !xhttp.responseText.includes("<br/>")){
 					// Succes
-					console.log('checkCookieUserID else succes');
+					console.log('sdu_1_checkCookieuserID else succes');
 					//console.log(deviceID, sessionID);
 				} else{
 					// Error
-					console.log('checkCookieUserID else error');
+					console.log('sdu_1_checkCookieuserID else error');
 					console.error(xhttp.responseText);
 				}
 			});
 			
 			// Define what happens in case of error
 			xhttp.addEventListener( 'error', function(event) {
-				console.log('checkCookieUserID else server error');
+				console.log('sdu_1_checkCookieuserID else server error');
 				console.error(xhttp2.responseText);
 			});
 			
@@ -190,9 +179,9 @@ function checkCookieUserID(daysToExpire) {
 		}
 		return(2);
     } else{
-		var deviceID = getCookie('user-id');
+		var deviceID = sdu_1_getCookie('user-id');
 		//console.log("Cookie update!")
-		setCookie("user-id", deviceID, daysToExpire);
+		sdu_1_setCookie("user-id", deviceID, daysToExpire);
 		return(3);
 	}
 }
@@ -219,23 +208,23 @@ function checkCookieUserID(daysToExpire) {
 }*/
 
 /* Function for saving session info at first page load */
-function saveSession(elapsed, articleID, scrollY, lat, lon){
+function sdu_1_saveSession(elapsed, articleID, scrollY, lat, lon){
 	if(elapsed != "" && articleID != ""){
-		const sessionID = checkSessionCookie();
+		const sessionID = sdu_1_checkSessionCookie();
 		let xhttp = new XMLHttpRequest();
 		
 		// Define what happens on successful data submission
 		xhttp.addEventListener( 'load', function(event) {
 			if(!xhttp.responseText.includes("Error") && !xhttp.responseText.includes("<br/>")){
 				// Succes
-				console.log('saveSession succes');
+				console.log('sdu_1_saveSession succes');
 			} else{
 				// Error
-				console.log('saveSession error');
+				console.log('sdu_1_saveSession error');
 				console.log(sessionID, elapsed, articleID, scrollY, lat, lon);
 				console.error(xhttp.responseText);
 				// Attempting to add entry potential missing entry to session
-				let deviceID = getCookie('user-id');
+				let deviceID = sdu_1_getCookie('user-id');
 				let xhttpSession = new XMLHttpRequest();
 				xhttpSession.open("POST", fullUrl + "php/session.php", true);
 				xhttpSession.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -254,10 +243,10 @@ function saveSession(elapsed, articleID, scrollY, lat, lon){
 						xhttp.addEventListener( 'load', function(event) {
 							if(!xhttp.responseText.includes("Error") && !xhttp.responseText.includes("<br/>")){
 								// Succes
-								console.log('saveSession second attempt succes');
+								console.log('sdu_1_saveSession second attempt succes');
 							} else{
 								// Error
-								console.log('saveSession second attempt error');
+								console.log('sdu_1_saveSession second attempt error');
 								console.log(sessionID, elapsed, articleID, scrollY, lat, lon);
 								console.error(xhttp.responseText);
 							}
@@ -265,7 +254,7 @@ function saveSession(elapsed, articleID, scrollY, lat, lon){
 
 						// Define what happens in case of error
 						xhttp.addEventListener( 'error', function(event) {
-							console.log('saveSession second attempt server error');
+							console.log('sdu_1_saveSession second attempt server error');
 							console.error(xhttp.responseText);
 						});
 						
@@ -277,14 +266,14 @@ function saveSession(elapsed, articleID, scrollY, lat, lon){
 						xhttp.send(data);
 					} else{
 						// Error
-						console.log('saveSession else error');
+						console.log('sdu_1_saveSession else error');
 						console.error(xhttpSession.responseText);
 					}
 				});
 				
 				// Define what happens in case of error
 				xhttpSession.addEventListener( 'error', function(event) {
-					console.log('checkCookieUserID else server error');
+					console.log('sdu_1_saveSession else server error');
 					console.error(xhttp2.responseText);
 				});
 				
@@ -294,7 +283,7 @@ function saveSession(elapsed, articleID, scrollY, lat, lon){
 
 		// Define what happens in case of error
 		xhttp.addEventListener( 'error', function(event) {
-			console.log('saveSession server error');
+			console.log('sdu_1_saveSession server error');
 			console.error(xhttp.responseText);
 		});
 		
@@ -308,11 +297,11 @@ function saveSession(elapsed, articleID, scrollY, lat, lon){
 }
 
 /* Function for updating session info at event */
-function updateSession(scrollY){
-    const sessionID = checkSessionCookie();
+function sdu_1_updateSession(scrollY){
+    const sessionID = sdu_1_checkSessionCookie();
     const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
     const endDate = new Date();
-    const spentTime = endDate.getTime() - startDate.getTime();
+    const spentTime = endDate.getTime() - sdu_1_startDate.getTime();
     const elapsed = Math.floor(spentTime/1000);
 
 	if(sessionID !== null && elapsed != "" && articleID != ""){
@@ -327,93 +316,93 @@ function updateSession(scrollY){
 		xhttp.addEventListener( 'load', function(event) {
 			if(!xhttp.responseText.includes("Error") && !xhttp.responseText.includes("<br/>")){
 				// Succes
-				console.log('updateSession succes');
+				console.log('sdu_1_updateSession succes');
 			} else{
 				// Error
-				console.log('updateSession error');
+				console.log('sdu_1_updateSession error');
 				console.error(xhttp.responseText);
 			}
 		});
 
 		// Define what happens in case of error
 		xhttp.addEventListener( 'error', function(event) {
-			console.log('updateSession server error');
+			console.log('sdu_1_updateSession server error');
 			console.error(xhttp.responseText);
 		});
 
 		xhttp.send(data);
 	}
-    startDate = new Date(); // resetting start date after each update
+    sdu_1_startDate = new Date(); // resetting start date after each update
 }
 
 /* Function for computing percentage of page scrolled */
-function scrollPercentage() {
-    var scrollPercentage = (((document.documentElement.scrollTop + document.body.scrollTop) / (document.documentElement.scrollHeight - document.documentElement.clientHeight) || 0) * 100);
+function sdu_1_scrollPercentage() {
+    let scrollPercentage = (((document.documentElement.scrollTop + document.body.scrollTop) / (document.documentElement.scrollHeight - document.documentElement.clientHeight) || 0) * 100);
     return scrollPercentage;
 }
 
 // path of cookie scripts
-var script = document.currentScript;
-var fullUrl = script.src.split('/').slice(0, -2).join('/')+'/';
+let script = document.currentScript;
+let fullUrl = script.src.split('/').slice(0, -2).join('/')+'/';
 
 /* Pushing session info to database when page loads */
 window.addEventListener('load', (event) => {
 	let daysToExpire = 30; // number of days before cookie expires
 
 	/* Initiating variables to be updated */
-	startDate = new Date();
+	sdu_1_startDate = new Date();
 	let maxScroll = 0; 
 	
 	const elapsed = 1; // can't be zero, so initial value is 1
 	const articleID = document.head.querySelector("[property='bazo:id'][content]").content;
 	let scrollY = maxScroll;
-
-	checkCookieuserID(daysToExpire);
+	
+	sdu_1_checkCookieuserID(daysToExpire);
 	/*(async function() {
 		pos = await getLocation();
-		dis = await checkCookieUserID(daysToExpire);
+		dis = await sdu_1_checkCookieuserID(daysToExpire);
 	})().then(() => {
 		// If succes
 		let lat = pos.coords.latitude.toFixed(3); // Get latitude and generalise position
 		let lon = pos.coords.longitude.toFixed(3); // Get longitude and generalise position
 		//console.log(pos);
 		//console.log(dis);
-		saveSession(elapsed, articleID, scrollY, lat, lon);
+		sdu_1_saveSession(elapsed, articleID, scrollY, lat, lon);
 	}).catch((err) => {
 		// If failed
 		//console.log(err);*/
 		let lat = "0,0";
 		let lon = "0,0";
-		saveSession(elapsed, articleID, scrollY, lat, lon);
+		sdu_1_saveSession(elapsed, articleID, scrollY, lat, lon);
 	//});
 
 	/* Updating maxScroll whenever scrolling is happening,
 	and updating elapsed and scrollY in database */
-	var isScrolling;
+	let isScrolling;
 	window.addEventListener('scroll', function(event ) {
 		// Clear our timeout throughout the scroll
 		window.clearTimeout( isScrolling );
 		// Set a timeout to run after scrolling ends
 		isScrolling = setTimeout(function() {
-			if(scrollPercentage() > maxScroll){
-				maxScroll = Math.round(scrollPercentage());
+			if(sdu_1_scrollPercentage() > maxScroll){
+				maxScroll = Math.round(sdu_1_scrollPercentage());
 			}
-			scrollY = maxScroll;
-			updateSession(scrollY);
+			let scrollY = maxScroll;
+			sdu_1_updateSession(scrollY);
 		}, 66);
 	}, false);
 
 	/* Pushing updated elapsed time and scrollY to database, when switching tabs */
 	document.addEventListener('visibilitychange', function(){
 		if (document.visibilityState === 'hidden') {
-			scrollY = maxScroll;
-			updateSession(scrollY);
+			let scrollY = maxScroll;
+			sdu_1_updateSession(scrollY);
 		}
 	});
 
 	document.addEventListener('click', function(){
-		scrollY = maxScroll;
-		updateSession(scrollY);
+		let scrollY = maxScroll;
+		sdu_1_updateSession(scrollY);
 	});
 });
 }
