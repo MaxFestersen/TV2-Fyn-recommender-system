@@ -26,8 +26,16 @@
     <meta name="robots" content="noindex" /><!-- Block indexing of site -->
 	
 	<!-- SCRIPTS -->
-    <script type="text/javascript" src="js/lib/jquery.min.js"></script>
     <script>
+		function setCookie(name,value,days) {
+			var expires = "";
+			if (days) {
+				var date = new Date();
+				date.setTime(date.getTime() + (days*24*60*60*1000));
+				expires = "; expires=" + date.toUTCString();
+			}
+			document.cookie = name + "=" + (value || "")  + expires + "; path=/";
+		}
 		function getCookie(name) {
 			var nameEQ = name + "=";
 			var ca = document.cookie.split(';');
@@ -38,10 +46,12 @@
 			}
 			return null;
 		}
-
-		let value = "{stamp:%2testtesttest/of/fA==%27%2Cnecessary:false%2Cpreferences:false%2Cstatistics:false%2Cmarketing:false%2Cver:3%2Cutc:1638173002345%2Cregion:%27dk%27}";
-		document.cookie = "CookieConsent=" + value + "; path=/; samesite=strict; secure";
-		
+		function eraseCookie(name) {   
+			document.cookie = name + 
+			'=; Max-Age=-99999999;' +
+			'; path=/; domain=' + location.host;  
+		}
+		eraseCookie("CookieConsent");
 	</script>
     <script type="text/javascript" async src="js/cookie.js"></script>
 </head>
@@ -49,5 +59,5 @@
 <h1>Cookie test site</h1>
 <p>For testing cookie functionality.</p>
 <a href="index.html">The first page</a>
-<a href="third-page.html">Third page</a>
+<a href="other-page.html">The other page</a>
 </body>
