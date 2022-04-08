@@ -24,8 +24,6 @@ date DATETIME,
 elapsed TIME,
 articleID VARCHAR(255) NOT NULL,
 scrollY	INT(3),
-lat FLOAT(6,3),
-lon FLOAT(6,3),
 PRIMARY KEY (sessionID, articleID),
 FOREIGN KEY (sessionID) REFERENCES session(sessionID)
 ON DELETE CASCADE

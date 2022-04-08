@@ -208,7 +208,7 @@ function sdu_1_checkCookieuserID(daysToExpire) {
 }*/
 
 /* Function for saving session info at first page load */
-function sdu_1_saveSession(elapsed, articleID, scrollY, lat, lon){
+function sdu_1_saveSession(elapsed, articleID, scrollY){
 	if(elapsed != "" && articleID != ""){
 		const sessionID = sdu_1_checkSessionCookie();
 		let xhttp = new XMLHttpRequest();
@@ -221,7 +221,7 @@ function sdu_1_saveSession(elapsed, articleID, scrollY, lat, lon){
 			} else{
 				// Error
 				console.log('sdu_1_saveSession error');
-				console.log(sessionID, elapsed, articleID, scrollY, lat, lon);
+				console.log(sessionID, elapsed, articleID, scrollY);
 				console.error(xhttp.responseText);
 				// Attempting to add entry potential missing entry to session
 				let deviceID = sdu_1_getCookie('user-id');
@@ -247,7 +247,7 @@ function sdu_1_saveSession(elapsed, articleID, scrollY, lat, lon){
 							} else{
 								// Error
 								console.log('sdu_1_saveSession second attempt error');
-								console.log(sessionID, elapsed, articleID, scrollY, lat, lon);
+								console.log(sessionID, elapsed, articleID, scrollY);
 								console.error(xhttp.responseText);
 							}
 						});
@@ -260,7 +260,7 @@ function sdu_1_saveSession(elapsed, articleID, scrollY, lat, lon){
 						
 						xhttp.open("POST", fullUrl + "php/sessionInfo.php", true);
 						xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-						let data = `sessionID=${sessionID}&elapsed=${elapsed}&articleID=${articleID}&scrollY=${scrollY}&lat=${lat}&lon=${lon}`;
+						let data = `sessionID=${sessionID}&elapsed=${elapsed}&articleID=${articleID}&scrollY=${scrollY}`;
 						data = data.replace( /%20/g, '+' );
 						//console.log(data);
 						xhttp.send(data);
@@ -289,7 +289,7 @@ function sdu_1_saveSession(elapsed, articleID, scrollY, lat, lon){
 		
 		xhttp.open("POST", fullUrl + "php/sessionInfo.php", true);
 		xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-		let data = `sessionID=${sessionID}&elapsed=${elapsed}&articleID=${articleID}&scrollY=${scrollY}&lat=${lat}&lon=${lon}`;
+		let data = `sessionID=${sessionID}&elapsed=${elapsed}&articleID=${articleID}&scrollY=${scrollY}`;
 		data = data.replace( /%20/g, '+' );
 		//console.log(data);
 		xhttp.send(data);
@@ -358,23 +358,7 @@ window.addEventListener('load', (event) => {
 	let scrollY = maxScroll;
 	
 	sdu_1_checkCookieuserID(daysToExpire);
-	/*(async function() {
-		pos = await getLocation();
-		dis = await sdu_1_checkCookieuserID(daysToExpire);
-	})().then(() => {
-		// If succes
-		let lat = pos.coords.latitude.toFixed(3); // Get latitude and generalise position
-		let lon = pos.coords.longitude.toFixed(3); // Get longitude and generalise position
-		//console.log(pos);
-		//console.log(dis);
-		sdu_1_saveSession(elapsed, articleID, scrollY, lat, lon);
-	}).catch((err) => {
-		// If failed
-		//console.log(err);*/
-		let lat = "0,0";
-		let lon = "0,0";
-		sdu_1_saveSession(elapsed, articleID, scrollY, lat, lon);
-	//});
+	sdu_1_saveSession(elapsed, articleID, scrollY);
 
 	/* Updating maxScroll whenever scrolling is happening,
 	and updating elapsed and scrollY in database */

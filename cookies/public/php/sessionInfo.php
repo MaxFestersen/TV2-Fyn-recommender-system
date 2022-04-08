@@ -9,8 +9,6 @@ $date= date('Y-m-d H:i:s');
 $elapsed=date('H:i:s', $_POST['elapsed']);
 $articleID=$_POST['articleID'];
 $scrollY=$_POST['scrollY'];
-$lat=str_replace(',', '.', $_POST['lat']);
-$lon=str_replace(',', '.', $_POST['lon']);
 
 // CHECK IF EXISTS
 // CHECK IF EXISTS: Connection and bind params
@@ -29,26 +27,12 @@ $row = $result->fetch_assoc();	//echo $row["COUNT(sessionID)"];
 $existsCheck->close();
 if($row["COUNT(sessionID)"]==0){
 	// PREPARE
-	$stmt = $conn -> prepare("INSERT INTO `sessionInfo`(`sessionID`, `date`, `elapsed`, `articleID`, `scrollY`, `lat`, `lon`) VALUES (?, ?, ?, ?, ?, ?, ?)");
-	$stmt -> bind_param("ssssidd", $sessionID, $date, $elapsed, $articleID, $scrollY, $lat, $lon);
+	$stmt = $conn -> prepare("INSERT INTO `sessionInfo`(`sessionID`, `date`, `elapsed`, `articleID`, `scrollY`) VALUES (?, ?, ?, ?, ?)");
+	$stmt -> bind_param("ssssi", $sessionID, $date, $elapsed, $articleID, $scrollY);
 	
 	// EXECUTE & PRINT RESULT
 	if ($stmt->execute() === TRUE) {
 		echo "New record created successfully";
-	} else {
-		//echo "Error: " . $sql . "<br>" . $conn->error;
-		echo "Error.<br>" . $stmt->error;
-	}
-	$stmt->close();
-} else {
-	// PREPARE
-	$stmt = $conn -> prepare("UPDATE `sessionInfo` SET `lat` = ?, `lon` = ? WHERE `sessionID` = ? AND `articleID` = ?;");
-	$stmt -> bind_param("ddss", $lat, $lon, $sessionID, $articleID);
-	
-	// EXECUTE & PRINT RESULT
-	if ($stmt->execute() === TRUE) {
-		//echo "Error.<br>" . $lat;
-		echo "New record updated successfully";
 	} else {
 		//echo "Error: " . $sql . "<br>" . $conn->error;
 		echo "Error.<br>" . $stmt->error;
