@@ -12,10 +12,10 @@ from flask_apispec.extension import FlaskApiSpec
 from flask_apispec.views import MethodResource
 from flask_apispec import marshal_with, doc
 from waitress import serve
-from surprise import dump
-from data_optimized import allUsers, User, CookieDatabase
 import requests
 import json
+
+from utility.data_optimized import User, allUsers
 
 # API
 app = Flask(__name__)  # Flask app instance initiated
@@ -46,7 +46,7 @@ class article_schema(Schema):
 
 class ContentBased(MethodResource, Resource):
     @doc(description='Get all articleID\'s of a specific users history', tags=['Content Based'])
-    @marshal_with(article_schema) # marshalling
+    
     def get(self, deviceID: str):
         '''
             get:
@@ -62,32 +62,21 @@ class ContentBased(MethodResource, Resource):
 
 class CollaborativeFiltering(MethodResource, Resource):
     
-    model, _ = dump.load('./SVDpp_model')
-    articleIDs = CookieDatabase().allArticleIDs()
-
-    def getRecommendations(self, deviceID: str):
-        ratings = [self.model.predict(uid=deviceID, iid=iid).est for iid in self.articleIDs]
-        predictions = dict(zip(self.articleIDs, ratings))
-        return sorted(predictions.items(), key=lambda x:x[1], reverse=True)
-        
     @doc(description='Get all articleID\'s of a specific users history', tags=['Collaborative Filtering'])
+    
     def get(self, deviceID: str):
         '''
             get:
                 description: Get method for CollaborativeFiltering
         '''
-        u = User(deviceID)
-        articleIDs = u.articleIDs()
-        recs = self.getRecommendations(deviceID)
-        return {k: v for k,v in recs if k not in articleIDs}
-import operator
+        pass
 
 class DCN(MethodResource, Resource):
     @doc(description='Get Deep Cross Network recommendations for a specific user', tags=['Deep Cross Network'])
     def get(self, deviceID: str):
         u = User(deviceID)
         data = u.antiInteractions()
-        r = requests.post('http://localhost:8501/v1/models/DCN:predict', json.dumps({"signature_name": "serving_default", "instances": data.to_dict('records')}))
+        r = requests.post('http://0.0.0.0:8501/v1/models/DCN:predict', json.dumps({"signature_name": "serving_default", "instances": data.to_dict('records')}))
         pred = json.loads(r.content.decode('utf-8'))
         return dict(zip(data['article_id'], sum(pred['predictions'], [])))
 
