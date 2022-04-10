@@ -384,9 +384,9 @@ window.addEventListener('load', (event) => {
 		}
 	});
 
-	document.addEventListener('click', function(){
+	/*document.addEventListener('click', function(){
 		let scrollY = maxScroll;
 		sdu_1_updateSession(scrollY);
-	});
+	});*/
 });
 }
