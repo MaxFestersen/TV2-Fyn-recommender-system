@@ -17,13 +17,7 @@ $deviceVendor=$_POST['deviceVendor'];
 
 // EXECUTE & PRINT RESULT
 if ($stmt->execute() === TRUE) {
-	function convert($size)
-	{
-		$unit=array('b','kb','mb','gb','tb','pb');
-		return @round($size/pow(1024,($i=floor(log($size,1024)))),2).' '.$unit[$i];
-	}
-	echo "Error but not really.<br>" . convert(memory_get_usage(false));
-	//echo "New record created successfully";
+	echo "New record created successfully";
 } else {
 	echo "Error.<br>" . $stmt->error;
 }
