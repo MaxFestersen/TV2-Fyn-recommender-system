@@ -248,7 +248,7 @@ class CookieDatabase():
             user=os.environ.get('MYSQL_USER'),
             password=os.environ.get('MYSQL_PASS'),
             database=os.environ.get('MYSQL_DB'))
-            self.notArticles = Bazo().notArticleIDs
+            self.notArticles = Bazo().notArticleIDs()
     
     def getTable(self, stmt: str, columns: list):
         '''
@@ -285,12 +285,12 @@ class CookieDatabase():
     
     def updateArticles(self):
         '''
-            updateArticleLength:
+            updateArticles:
                 description: checks if there are articleID's in sessionInfo not present in articleLength and requests text of missing articleID's.
                             Then computes the length in characters and inserts length and articleID in articleLength.
                 inputs:
                     - self.getList: method for getting list from sql statement
-                    - self.Bazo.articleTexts: method for requesting text from list of articleID's
+                    - Bazo: class with methods to get article data from Bazo API
                     - self.db: MySQLConnection
                 returns:
                     - prints whether articles was updated or not  
@@ -299,8 +299,8 @@ class CookieDatabase():
                     WHERE articleID NOT IN (SELECT articleID FROM articles)
                     AND articleID NOT IN {self.notArticles};"""
         MISSING_IDS = self.getList(stmt)
-        if MISSING_IDS:
-            b = Bazo(MISSING_IDS)
+        def helper(self, ids=None):
+            b = Bazo(ids)
             articleTexts = b.articleTexts()
             articleTitles = b.articleTitles()
             releaseDates = b.releaseDates()
@@ -310,15 +310,21 @@ class CookieDatabase():
             if articleTexts:
                 lengths = {k:len(v) for (k,v) in articleTexts.items()}
                 cur = self.db.cursor()
-                stmt = "INSERT INTO articles(articleID, title, length, releaseDate, section, location) VALUES {};".format(",".join("(%s, %s, %s, %s, %s, %s)" \
+                stmt = "INSERT IGNORE INTO articles(articleID, title, length, releaseDate, section, location) VALUES {};".format(",".join("(%s, %s, %s, %s, %s, %s)" \
                     for _ in lengths.items()))
                 rows = list(sum([(k, articleTitles.get(k), lengths.get(k), releaseDates.get(k), articleSections.get(k), articleLocations.get(k))\
                      for k in articleTitles.keys()], ()))
                 cur.execute(stmt, rows)
                 self.db.commit()
                 cur.close()
-                return print("Updated")
-        return print("Nothing to update")
+                return print(f"Updated {'user read articles' if ids else 'listed articles'}")
+            return print("Nothing to update")
+        if MISSING_IDS:
+            helper(self, MISSING_IDS)
+            helper(self)
+        else:
+            helper(self)
+        
     
     def allArticleIDs(self):
         stmt = """SELECT articleID FROM articles WHERE length > 0;"""
