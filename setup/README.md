@@ -1,12 +1,12 @@
 # Prerequisites
 
-Tools needed for working environment:
+## Tools needed for working environment:
 
 - AWS CLI [install](https://aws.amazon.com/cli/)
 - Docker Compose CLI 19.03 or later [install](https://docs.docker.com/cloud/ecs-integration/)
 
 
-Setup:
+## Setup:
 
 - AWS CLI configuration [read more](https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-quickstart.html)
 - Docker AWS ECS context [read more](https://docs.docker.com/cloud/ecs-integration/)
@@ -24,7 +24,7 @@ Setup:
 - Create AWS secret with database info (done in docker-compose.ecs.yml)
   - Create directory with .env containing database info `secrets/.env`
 
-Run:
+## Run:
 
 ```$ docker compose -f docker-compose.ecs.yml up```
 - Automatically sets up loadbalancer, vpc and security group allowing access on port 80
