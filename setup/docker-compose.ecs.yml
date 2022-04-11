@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  php:
+    image: adernild/tv2fyn-cookie-php
+    x-aws-pull_credentials: "arn:aws:dockerhubcredentials[replace this when secret is created]"
+    secrets: 
+      - .env
+    ports:
+      - '80:80'
+    deploy:
+      x-aws-autoscaling:
+        min: 1
+        max: 10
+        cpu: 75
+
+secrets: 
+  .env:
+    file: ./secrets/.env
