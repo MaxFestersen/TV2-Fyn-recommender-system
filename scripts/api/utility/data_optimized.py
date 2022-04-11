@@ -65,7 +65,7 @@ class Bazo():
         conn.close()
         return results
     
-    def listArticles(self, sectionID=None):
+    def listArticles(self, sectionID=None, locsec:bool=False):
         '''
             listArticles:
                 description: lists articles with optional filtering of specific sections
@@ -77,6 +77,8 @@ class Bazo():
         '''
         if sectionID:
             r = requests.get(f'{self.url}/articles?q=section:{sectionID}')
+        if locsec:
+            r = requests.get(f'{self.url}/articles??&include[0]=activeContentRevision.publishedPrimaryLocation&include[1]=activeContentRevision.publishedPrimarySection')
         else:
             r = requests.get(f'{self.url}/articles')
         return r.json()['data']
@@ -158,8 +160,9 @@ class Bazo():
         '''
         if self.articleIDs:
             return self.getParallel('/articles/', self.articleIDs)
-        return None
-
+        articleData = self.listArticles(locsec=True)
+        return dict(zip([_['uuid'] for _ in articleData], [{'data':_} for _ in articleData]))
+        
     def articleTitles(self):
         '''
             articleTitle:
@@ -290,7 +293,7 @@ class CookieDatabase():
                     - self.Bazo.articleTexts: method for requesting text from list of articleID's
                     - self.db: MySQLConnection
                 returns:
-                    - prints whether articleLength was updated or not  
+                    - prints whether articles was updated or not  
         '''
         stmt = f"""SELECT DISTINCT(articleID) FROM sessionInfo
                     WHERE articleID NOT IN (SELECT articleID FROM articles)
