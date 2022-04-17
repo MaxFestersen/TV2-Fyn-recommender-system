@@ -187,6 +187,6 @@ model.fit(cached_train,
  epochs=3,
  callbacks=[tensorboard_callback])
 
-# model.evaluate(cached_test, return_dict=True)
+model.evaluate(cached_test, return_dict=True)
 
-# tf.saved_model.save(model, 'tfserving/models/DCN/{}'.format(int(time.time())))
+tf.saved_model.save(model, 'tfserving/models/DCN/{}'.format(int(time.time())))
