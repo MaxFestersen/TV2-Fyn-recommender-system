@@ -52,7 +52,7 @@ for feature in cont_features:
     vocabularies[feature] = [cont, cont_bucket]
 
 feature_dict = {
-    'str_features': ['article_id', 'device_id', 'section', 'location', 'section', 'location'],
+    'str_features': ['article_id', 'device_id', 'section', 'location'],
     'int_features': ['day_of_week'],
     'text_features': ['title'],
     'cont_features': ['time', 'release_date'],
@@ -84,7 +84,7 @@ class DCN(tfrs.Model):
                 StringLookup(
                     vocabulary=vocabulary, mask_token=None),
                 Embedding(len(vocabulary) + 1, self.embedding_dimension)
-            ])
+            ], name=feature)
         
         # Create embeddings for int features
         for feature in self.int_features:
@@ -93,7 +93,7 @@ class DCN(tfrs.Model):
                 IntegerLookup(
                     vocabulary=vocabulary, mask_token=None),
                 Embedding(len(vocabulary) + 1, self.embedding_dimension)
-            ])
+            ], name=feature)
 
         # Create embeddings for text features
         for feature in self.text_features:
@@ -104,14 +104,15 @@ class DCN(tfrs.Model):
                 vectorizer,
                 Embedding(self.max_tokens, self.embedding_dimension, mask_zero=True),
                 GlobalAveragePooling1D()
-            ])
+            ], name=feature)
             vectorizer.adapt(vocabularies[feature])
         
         # Create embeddings for continuous features
         for feature in self.cont_features:
             vocab = vocabularies[feature][0]
             normalized = Normalization(
-                axis=None
+                axis=None,
+                name=feature
             )
             normalized.adapt(vocab)
             self._embeddings_cont[feature] = normalized
@@ -122,7 +123,7 @@ class DCN(tfrs.Model):
             self._embeddings[feature] = Sequential([
                 Discretization(vocab.tolist()),
                 Embedding(len(vocab) + 1, self.embedding_dimension)
-            ])
+            ], name=feature)
         
         if use_cross_layer:
             self._cross_layer = tfrs.layers.dcn.Cross(
@@ -152,7 +153,7 @@ class DCN(tfrs.Model):
             embeddings.append(tf.reshape(embedding_fn(inputs[feature]), (-1,1)))
 
         x = tf.concat(embeddings, axis=1)
-        
+
         # Build Cross Network
         if self._cross_layer is not None:
             x = self._cross_layer(x)
@@ -171,14 +172,21 @@ class DCN(tfrs.Model):
             predictions=scores
         )
 
+
 cached_train = train.shuffle(n_inter).batch(10).cache()
 cached_test = test.shuffle(n_inter).batch(5).cache()
 
 model = DCN(feature_dict, True, [64, 32])
 
 model.compile(optimizer=tf.keras.optimizers.Adagrad(learning_rate=0.1))
-model.fit(cached_train, epochs=3)
 
-model.evaluate(cached_test, return_dict=True)
+logdir="logs/fit/" + str(time.time())
+tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
 
-tf.saved_model.save(model, 'tfserving/models/DCN/{}'.format(int(time.time())))
+model.fit(cached_train,
+ epochs=3,
+ callbacks=[tensorboard_callback])
+
+# model.evaluate(cached_test, return_dict=True)
+
+# tf.saved_model.save(model, 'tfserving/models/DCN/{}'.format(int(time.time())))
