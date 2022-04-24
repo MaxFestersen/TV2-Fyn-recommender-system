@@ -61,8 +61,9 @@ feature_dict = {
 
 class DCN(tfrs.Model):
 
-    def __init__(self, feature_dict: dict, use_cross_layer: bool, deep_layer_size: list, projection_dim=None):
+    def __init__(self, feature_dict: dict, use_cross_layer: bool, n_cross_layers: int, deep_layer_size: list, projection_dim=None):
         super().__init__()
+        self.n_cross_layers = n_cross_layers
 
         self.embedding_dimension = 32
         self.max_tokens = 10_000
@@ -158,7 +159,10 @@ class DCN(tfrs.Model):
 
         # Build Cross Network
         if self._cross_layer is not None:
-            x = self._cross_layer(x)
+            layers = []
+            for i in range(self.n_cross_layers):
+                layers.append(self._cross_layer(x))
+            x = tf.concat(layers, axis=1)
         
         # Build Deep Network
         for deep_layer in self._deep_layers:
@@ -178,7 +182,12 @@ class DCN(tfrs.Model):
 cached_train = train.shuffle(n_inter).batch(128).cache()
 cached_test = test.shuffle(n_inter).batch(64).cache()
 
-model = DCN(feature_dict, True, [64, 32])
+model = DCN(
+    feature_dict = feature_dict, 
+    use_cross_layer=True, 
+    n_cross_layers=2,
+    deep_layer_size=[64, 32]
+    )
 
 model.compile(optimizer=tf.keras.optimizers.Adagrad(learning_rate=0.1))
 
