@@ -73,7 +73,7 @@ class DCN(tfrs.Model):
         self.cont_features = feature_dict.get('cont_features')
         self.disc_features = feature_dict.get('disc_features')
         
-        self._all_features = self.str_features + self.int_features + self.text_features + self.cont_features + self.disc_features
+        self._all_features = self.str_features + self.int_features + self.text_features + self.disc_features
         self._embeddings = {}
         self._embeddings_cont = {}
 
@@ -98,7 +98,9 @@ class DCN(tfrs.Model):
         # Create embeddings for text features
         for feature in self.text_features:
             vectorizer = TextVectorization(
-                max_tokens=self.max_tokens
+                max_tokens=self.max_tokens,
+                standardize='lower_and_strip_punctuation',
+                ngrams=3
             )
             self._embeddings[feature] = Sequential([
                 vectorizer,
@@ -173,8 +175,8 @@ class DCN(tfrs.Model):
         )
 
 
-cached_train = train.shuffle(n_inter).batch(10).cache()
-cached_test = test.shuffle(n_inter).batch(5).cache()
+cached_train = train.shuffle(n_inter).batch(128).cache()
+cached_test = test.shuffle(n_inter).batch(64).cache()
 
 model = DCN(feature_dict, True, [64, 32])
 
