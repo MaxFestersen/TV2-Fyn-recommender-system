@@ -6,8 +6,8 @@ $dotenv->safeLoad();
 
 $servername = $_ENV['MYSQL_HOST'];
 $username = $_ENV['MYSQL_USER'];
-$password = $_ENV['MYSQL_PASS'];
-$db = $_ENV['MYSQL_DB'];
+$password = $_ENV['MYSQL_PASSWORD'];
+$db = $_ENV['MYSQL_DATABASE'];
 
 $conn = new mysqli($servername, $username, $password, $db);
 
