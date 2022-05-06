@@ -141,3 +141,4 @@ scripts/env
 
 # local test files
 tv2fyn/
+scripts/api/database_contents.csv

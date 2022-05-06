@@ -246,8 +246,8 @@ class CookieDatabase():
             self.db = MySQLConnection(
             host=os.environ.get('MYSQL_HOST'),
             user=os.environ.get('MYSQL_USER'),
-            password=os.environ.get('MYSQL_PASS'),
-            database=os.environ.get('MYSQL_DB'))
+            password=os.environ.get('MYSQL_PASSWORD'),
+            database=os.environ.get('MYSQL_DATABASE'))
             self.notArticles = Bazo().notArticleIDs()
     
     def getTable(self, stmt: str, columns: list):
