@@ -7,6 +7,7 @@ from mysql.connector import MySQLConnection
 from dotenv import load_dotenv
 import os
 from numpy import float32, int32
+from sentida import Sentida
 
 import requests
 import asyncio
@@ -194,7 +195,7 @@ class Bazo():
             return None
         if articleData:
             articleText = dict(zip(articleData.keys(), list(map(extractCleanText, [_['data'] for _ in articleData.values()]))))
-            return articleText
+            return {k:v for k,v in articleText.items() if v}
         return None
     
     def releaseDates(self):
@@ -309,11 +310,12 @@ class CookieDatabase():
 
             if articleTexts:
                 lengths = {k:len(v) for (k,v) in articleTexts.items()}
+                sentiments = {k:Sentida().sentida(v, output='mean', normal=True) for (k,v) in articleTexts.items()}
                 cur = self.db.cursor()
-                stmt = "INSERT IGNORE INTO articles(articleID, title, length, releaseDate, section, location) VALUES {};".format(",".join("(%s, %s, %s, %s, %s, %s)" \
+                stmt = "INSERT IGNORE INTO articles(articleID, title, length, releaseDate, section, location, avgSent) VALUES {};".format(",".join("(%s, %s, %s, %s, %s, %s, %s)" \
                     for _ in lengths.items()))
-                rows = list(sum([(k, articleTitles.get(k), lengths.get(k), releaseDates.get(k), articleSections.get(k), articleLocations.get(k))\
-                     for k in articleTitles.keys()], ()))
+                rows = list(sum([(k, articleTitles.get(k), lengths.get(k), releaseDates.get(k), articleSections.get(k), articleLocations.get(k), float(sentiments.get(k)))\
+                     for k in articleTexts.keys()], ()))
                 cur.execute(stmt, rows)
                 self.db.commit()
                 cur.close()
@@ -325,7 +327,6 @@ class CookieDatabase():
         else:
             helper(self)
         
-    
     def allArticleIDs(self):
         stmt = """SELECT articleID FROM articles WHERE length > 0;"""
         return self.getList(stmt)
