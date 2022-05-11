@@ -10,12 +10,12 @@ function sdu_1_setCookie(name,value,days) {
 }
 
 function sdu_1_setSessionCookie(value){
-    document.cookie = "SessionCookie=" + (value || "") + "; path=/; samesite=strict; secure";
+    document.cookie = "sdu_1_SessionCookie=" + (value || "") + "; path=/; samesite=strict; secure";
 }
 
 function sdu_1_checkSessionCookie(){
 	// Returns cookie value or null
-	return((document.cookie.match(/^(?:.*;)?\s*SessionCookie\s*=\s*([^;]+)(?:.*)?$/)||[,null])[1]) // Returns
+	return((document.cookie.match(/^(?:.*;)?\s*sdu_1_SessionCookie\s*=\s*([^;]+)(?:.*)?$/)||[,null])[1]) // Returns
 }
 
 /* function for getting cookie value, returns null if none set for a name*/ 
@@ -68,11 +68,11 @@ function sdu_1_getBrowser() {
 
 /* function for checking if user-id is set, and if not sets it*/
 function sdu_1_checkCookieuserID(daysToExpire) {
-    let uID = sdu_1_getCookie('user-id');
+    let uID = sdu_1_getCookie('sdu_1_user-id');
     let sID = sdu_1_checkSessionCookie();
     if (uID == null) {
        // If no user cookie is set, both user cookie and session id is set.
-        sdu_1_setCookie("user-id", sdu_1_userID(), daysToExpire);
+        sdu_1_setCookie("sdu_1_user-id", sdu_1_userID(), daysToExpire);
 		if(sID == null){
 			var sessionID = sdu_1_userID() + "-s";
 			sdu_1_setSessionCookie(sessionID);
@@ -80,7 +80,7 @@ function sdu_1_checkCookieuserID(daysToExpire) {
 			var sessionID = sID;
 		}
         // Pushing user-id (deviceID) and session-id (sessionID) to database 
-		let deviceID = sdu_1_getCookie('user-id');
+		let deviceID = sdu_1_getCookie('sdu_1_user-id');
 		let screenWidth = screen.width;
 		let screenHeight = screen.height;
 		let deviceOS = sdu_1_getOS();
@@ -146,7 +146,7 @@ function sdu_1_checkCookieuserID(daysToExpire) {
     } else if (sID == null){
         // Setting session-id (sessionID) if not set, and pushing session-id (sessionID) with user-id (deviceID) to database
         //$(document).ready(function(){
-		let deviceID = sdu_1_getCookie('user-id');
+		let deviceID = sdu_1_getCookie('sdu_1_user-id');
 		let sessionID = sdu_1_userID() + "-s";
 		sdu_1_setSessionCookie(sessionID);
 		if(deviceID != "" && sessionID != ""){
@@ -179,9 +179,9 @@ function sdu_1_checkCookieuserID(daysToExpire) {
 		}
 		return(2);
     } else{
-		var deviceID = sdu_1_getCookie('user-id');
+		var deviceID = sdu_1_getCookie('sdu_1_user-id');
 		//console.log("Cookie update!")
-		sdu_1_setCookie("user-id", deviceID, daysToExpire);
+		sdu_1_setCookie("sdu_1_user-id", deviceID, daysToExpire);
 		return(3);
 	}
 }
@@ -224,7 +224,7 @@ function sdu_1_saveSession(elapsed, articleID, scrollY){
 				console.log(sessionID, elapsed, articleID, scrollY);
 				console.error(xhttp.responseText);
 				// Attempting to add entry potential missing entry to session
-				let deviceID = sdu_1_getCookie('user-id');
+				let deviceID = sdu_1_getCookie('sdu_1_user-id');
 				let xhttpSession = new XMLHttpRequest();
 				xhttpSession.open("POST", fullUrl + "php/session.php", true);
 				xhttpSession.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
@@ -342,8 +342,9 @@ function sdu_1_scrollPercentage() {
 }
 
 // path of cookie scripts
-let script = document.currentScript;
-let fullUrl = script.src.split('/').slice(0, -2).join('/')+'/';
+//let script = document.currentScript;
+//let fullUrl = script.src.split('/').slice(0, -2).join('/')+'/';
+let fullUrl = "https://recommendations.tv2fyn.dk:8443/";
 
 /* Pushing session info to database when page loads */
 window.addEventListener('load', (event) => {
