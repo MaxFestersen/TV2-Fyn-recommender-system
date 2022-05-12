@@ -10,10 +10,10 @@ ON DUPLICATE KEY UPDATE
 $stmt -> bind_param("ssssi", $sessionID, $date, $elapsed, $articleID, $scrollY);
 
 // SET VALUES
-$sessionID=$_POST['sessionID'];
+$sessionID = filter_var($_POST['sessionID'], FILTER_SANITIZE_STRING);
 $date = date('Y-m-d H:i:s');
-$elapsed=date('H:i:s', $_POST['elapsed']);
-$articleID=$_POST['articleID'];
+$elapsed = filter_var(date('H:i:s', $_POST['elapsed']), FILTER_SANITIZE_STRING);
+$articleID = filter_var($_POST['articleID'], FILTER_SANITIZE_STRING);
 $scrollY=$_POST['scrollY'];
 
 // EXECUTE & PRINT RESULT

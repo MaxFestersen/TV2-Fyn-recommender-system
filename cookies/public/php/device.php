@@ -8,12 +8,12 @@ $stmt = $conn -> prepare("INSERT INTO `device` (`deviceID`, `firstVisit`, `scree
 $stmt -> bind_param("ssiiss", $deviceID, $firstVisit, $screenWidth, $screenHeight, $deviceOS, $deviceVendor);
 
 // EXECUTE
-$deviceID=$_POST['deviceID'];
+$deviceID = filter_var($_POST['deviceID'], FILTER_SANITIZE_STRING);
 $firstVisit= date('Y-m-d');
 $screenWidth=$_POST['screenWidth'];
 $screenHeight=$_POST['screenHeight'];
-$deviceOS=$_POST['deviceOS'];
-$deviceVendor=$_POST['deviceVendor'];
+$deviceOS = filter_var($_POST['deviceOS'], FILTER_SANITIZE_STRING);
+$deviceVendor = filter_var($_POST['deviceVendor'], FILTER_SANITIZE_STRING);
 
 // EXECUTE & PRINT RESULT
 if ($stmt->execute() === TRUE) {
