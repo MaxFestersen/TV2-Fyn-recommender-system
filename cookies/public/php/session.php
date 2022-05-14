@@ -8,8 +8,8 @@ $stmt = $conn -> prepare("INSERT INTO `session`(`deviceID`, `sessionID`) VALUES 
 $stmt -> bind_param("ss", $deviceID, $sessionID);
 
 // SET VALUES
-$deviceID=$_POST['deviceID'];
-$sessionID=$_POST['sessionID'];
+$deviceID = filter_var($_POST['deviceID'], FILTER_SANITIZE_STRING);
+$sessionID = filter_var($_POST['sessionID'], FILTER_SANITIZE_STRING);
 
 // EXECUTE & PRINT RESULT
 if ($stmt->execute() === TRUE) {

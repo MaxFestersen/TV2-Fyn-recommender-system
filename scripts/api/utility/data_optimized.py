@@ -29,7 +29,24 @@ class Bazo():
         self.url = 'https://public.fyn.bazo.dk/v1'
         self.articleIDs = articleIDs
         self.articleData = self.getArticles()
-
+    
+    def justGetall(self, endpoint, ids: list):
+        '''
+            justGetall:
+                description: method for making a single request to bazo to get content. See getParallel for a alternative.
+                    - self.url: url for public bazo api
+                    - endpoint: str (endpoint to request from)
+                    - ids: list (list of id's for instance articleID)
+                returns:
+                    - results: dict (id,json)
+        '''
+        idlist = ""
+        for id in ids:
+            idlist = f"{idlist}[{id}]"
+        full_url = self.url + idlist
+        resp = requests.get(full_url)
+        result = resp.json()
+        return result
     def getParallel(self, endpoint, ids: list):
         '''
             getParallel:
