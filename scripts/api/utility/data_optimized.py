@@ -421,7 +421,7 @@ class allUsers(CookieDatabase):
         '''
         self.updateArticles()
         stmt = f"""SELECT DAYOFWEEK(sessionInfo.date), TIME_TO_SEC(sessionInfo.date), UNIX_TIMESTAMP(sessionInfo.date),
-                    session.deviceID, sessionInfo.articleID, articles.title, articles.section, articles.location, UNIX_TIMESTAMP(articles.releaseDate), 
+                    session.deviceID, sessionInfo.articleID, articles.title, articles.section, articles.location, UNIX_TIMESTAMP(articles.releaseDate), articles.avgSent,
                     (TIME_TO_SEC(sessionInfo.elapsed)*(sessionInfo.scrollY+1))/(articles.length) AS affinity
                     FROM sessionInfo
                     INNER JOIN session
@@ -429,7 +429,7 @@ class allUsers(CookieDatabase):
                     INNER JOIN articles
                         ON sessionInfo.articleID=articles.articleID
                     WHERE sessionInfo.articleID NOT IN {self.notArticles};"""
-        df = self.getTable(stmt, columns=['day_of_week', 'time', 'date', 'device_id', 'article_id', 'title', 'section', 'location', 'release_date', 'affinity'])
+        df = self.getTable(stmt, columns=['day_of_week', 'time', 'date', 'device_id', 'article_id', 'title', 'section', 'location', 'release_date', 'avg_sentiment', 'affinity'])
         df = df.dropna().reset_index(drop=True)
         df.affinity = df.affinity.astype(float32)
         return df
@@ -508,13 +508,13 @@ class User(CookieDatabase):
         return df
     
     def antiInteractions(self):
-        stmt = f"""SELECT DAYOFWEEK(CURDATE()), TIME_TO_SEC(CURTIME()), articleID, title, section, location, UNIX_TIMESTAMP(releaseDate)
+        stmt = f"""SELECT DAYOFWEEK(CURDATE()), TIME_TO_SEC(CURTIME()), articleID, title, section, location, UNIX_TIMESTAMP(releaseDate), avgSent
                     FROM articles
                     WHERE articleID NOT IN (SELECT articleID FROM sessionInfo
                                             INNER JOIN session
                                                 ON session.sessionID=sessionInfo.sessionID
                                                 WHERE session.deviceID="{self.deviceID}");"""
-        df = self.getTable(stmt, columns=['day_of_week', 'time', 'article_id', 'title', 'section', 'location', 'release_date'])
+        df = self.getTable(stmt, columns=['day_of_week', 'time', 'article_id', 'title', 'section', 'location', 'release_date', 'avg_sentiment'])
         df = df.dropna().reset_index(drop=True)
         df['device_id'] = self.deviceID
         return df

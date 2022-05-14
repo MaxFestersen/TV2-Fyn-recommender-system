@@ -55,7 +55,7 @@ class DCN(MethodResource, Resource):
     def get(self, deviceID: str):
         u = User(deviceID)
         data = u.antiInteractions()
-        r = requests.post('http://0.0.0.0:8501/v1/models/DCN:predict', json.dumps({"signature_name": "serving_default", "instances": data.to_dict('records')}))
+        r = requests.post('http://DCN:8501/v1/models/DCN:predict', json.dumps({"signature_name": "serving_default", "instances": data.to_dict('records')}))
         pred = json.loads(r.content.decode('utf-8'))
         return dict(zip(data['article_id'], sum(pred['predictions'], [])))
 
@@ -95,6 +95,6 @@ docs.register(DCN)
 
 
 if __name__ == '__main__':
-    app.run(debug=True) #development server
-    #serve(app, host='0.0.0.0', port=8080) #production server
+    #app.run(debug=True) #development server
+    serve(app, host='0.0.0.0', port=8080) #production server
     

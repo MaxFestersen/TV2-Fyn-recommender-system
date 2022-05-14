@@ -1,0 +1,42 @@
+version: '3.1'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api-v1
+    volumes:
+      - ./app.py:/srv/app/app.py
+      - ./utility/:/srv/app/utility/
+    secrets:
+      - source: .env
+        target: /srv/app/utility/.env
+    depends_on:
+      - tfserving
+    ports:
+      - '8080:8080'
+    networks:
+      - backend
+
+  tfserving:
+    image: tensorflow/serving:2.8.0
+    container_name: DCN
+    restart: always
+    volumes:
+      - ./tfserving/models/DCN:/models/DCN
+    environment:
+      - MODEL_NAME=DCN
+    expose:
+      - '8501'
+    networks:
+      - backend
+
+networks: 
+  backend:
+    external: 
+      name: backend
+          
+secrets: 
+  .env:
+    file: ./secrets/.env
