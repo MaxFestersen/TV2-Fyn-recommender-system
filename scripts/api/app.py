@@ -15,6 +15,7 @@ from flask_apispec import marshal_with, doc, use_kwargs
 from waitress import serve
 import requests
 import json
+from heapq import nlargest
 
 from utility.data_optimized import User, allUsers
 
@@ -29,7 +30,7 @@ app.config.update({
         openapi_version='3.0.0',
     ),
     'APISPEC_SWAGGER_URL': '/swagger/',  # URI to access API Doc JSON
-    'APISPEC_SWAGGER_UI_URL': '/swagger-ui/',  # URI to access UI of API Doc
+    'APISPEC_SWAGGER_UI_URL': '/',  # URI to access UI of API Doc
 })
 
 # Initiating the swagger docs
@@ -57,7 +58,8 @@ class DCN(MethodResource, Resource):
         data = u.antiInteractions()
         r = requests.post('http://DCN:8501/v1/models/DCN:predict', json.dumps({"signature_name": "serving_default", "instances": data.to_dict('records')}))
         pred = json.loads(r.content.decode('utf-8'))
-        return dict(zip(data['article_id'], sum(pred['predictions'], [])))
+        result = dict(zip(data['article_id'], sum(pred['predictions'], [])))
+        return {'top_10': nlargest(10, result, key=result.get)}
 
 class avgScrollAPI(MethodResource, Resource):
     @doc(description='Get average scroll of users per articleID or title',
