@@ -1,13 +1,13 @@
 from DCN import DCN
 import tensorflow as tf
-import sys
-from pathlib import Path
-import time
 from itertools import chain, combinations, product
 import json
 from tensorboard.plugins.hparams import api as hp
 import pandas as pd
 import numpy as np
+import os
+
+os.environ['TF_XLA_FLAGS'] = '--tf_xla_cpu_global_jit'
 
 # Loading data
 interactions = pd.read_csv('database_contents.csv')
@@ -73,12 +73,12 @@ ld = [dict(zip(dl.keys(), items))
 
 perm_dicts = [json.dumps(i) for i in ld]
 
-deep_layers = [json.dumps(i) for i in [[], [64,64], [128, 128], [64, 64, 128], [64, 128, 256]]]
+deep_layers = [json.dumps(i) for i in [[], [64,64], [128, 128], [64, 64, 128]]]
 
 
 HP_FEATURES = hp.HParam('feature_dicts', hp.Discrete(perm_dicts))
-HP_CROSS_BOOL = hp.HParam('use_cross_layer', hp.Discrete([True, False]))
-HP_N_CROSS = hp.HParam('n_cross_layers', hp.Discrete([1,2,3]))
+HP_CROSS_BOOL = hp.HParam('use_cross_layer', hp.Discrete([True]))
+HP_N_CROSS = hp.HParam('n_cross_layers', hp.Discrete([0,1,2]))
 HP_DEEP_SIZE = hp.HParam('deep_layer_size', hp.Discrete(deep_layers))
 
 METRIC_RMSE = tf.keras.metrics.RootMeanSquaredError('RMSE')

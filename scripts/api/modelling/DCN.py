@@ -106,7 +106,8 @@ class DCN(tfrs.Model):
             layers = []
             for i in range(self.n_cross_layers):
                 layers.append(self._cross_layer(x))
-            x = tf.concat(layers, axis=1)
+            if len(layers) > 0:
+                x = tf.concat(layers, axis=1)
         
         # Build Deep Network
         for deep_layer in self._deep_layers:
