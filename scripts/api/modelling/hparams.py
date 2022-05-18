@@ -54,7 +54,7 @@ feature_dict = {
     'int_features': ['day_of_week'],
     'text_features': ['title'],
     'cont_features': ['time', 'release_date', 'avg_sentiment'],
-    'disc_features': ['time', 'release_date', 'avg_sentiment']
+    'disc_features': ['time', 'avg_sentiment']
 }
 
 def powerset(s:list):
@@ -73,7 +73,7 @@ ld = [dict(zip(dl.keys(), items))
 
 perm_dicts = [json.dumps(i) for i in ld]
 
-deep_layers = [json.dumps(i) for i in [[], [64,64], [128, 128], [64, 64, 128]]]
+deep_layers = [json.dumps(i) for i in [[], [32, 64], [64, 128], [64, 64, 128]]]
 
 
 HP_FEATURES = hp.HParam('feature_dicts', hp.Discrete(perm_dicts))
