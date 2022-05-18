@@ -1,0 +1,22 @@
+<html>
+<head>
+<script>
+console.log("Initiating world destruction");
+// > Load local json file
+fetch('http://192.168.152.10:8080/api/DCN/978',{
+//fetch('https://api.dernild.com/api/DCN/978',{
+	headers : { 
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+       }
+})
+.then(response => response.text())
+.then((data) => {
+	console.log(data);
+})
+</script>
+</head>
+<body>
+Ehh that good..
+</body>
+</html>
