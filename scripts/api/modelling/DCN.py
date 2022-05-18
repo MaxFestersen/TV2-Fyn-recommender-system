@@ -1,67 +1,11 @@
-from pathlib import Path
-import time
 import tensorflow as tf
 import tensorflow_recommenders as tfrs
-import numpy as np
 from tensorflow.keras import Sequential
 from tensorflow.keras.layers import StringLookup, IntegerLookup, Embedding, Dense, Discretization, Normalization, TextVectorization, GlobalAveragePooling1D
-import os
-import sys
-
-sys.path.append(str(Path(__file__).parents[1]))
-from utility.data_optimized import allUsers
-
-os.environ['TF_XLA_FLAGS'] = '--tf_xla_cpu_global_jit'
-
-interactions = allUsers().interactions()
-
-interactions = tf.data.Dataset.from_tensor_slices(dict(interactions))
-
-interactions = interactions.map(lambda x: {
-    'day_of_week': x['day_of_week'],
-    'time': x['time'],
-    'device_id': x['device_id'],
-    'article_id': x['article_id'],
-    'title': x['title'],
-    'section': x['section'],
-    'location': x['location'],
-    'release_date': x['release_date'],
-    'affinity': x['affinity'],
-})
-
-n_inter = len(interactions)
-
-tf.random.set_seed(42)
-shuffled = interactions.shuffle(n_inter, seed=42, reshuffle_each_iteration=False)
-train = shuffled.take(int(n_inter*0.8))
-test = shuffled.skip(int(n_inter*0.8)).take(int(n_inter*0.2))
-
-cat_features = ['day_of_week', 'article_id', 'device_id', 'title', 'section', 'location']
-cont_features = ['time', 'release_date']
-vocabularies = {}
-
-for feature in cat_features:
-    vocab = interactions.batch(1_000_000).map(lambda x: x[feature])
-    vocabularies[feature] = np.unique(np.concatenate(list(vocab)))
-
-for feature in cont_features:
-    cont =  np.concatenate(list(interactions.map(lambda x: x[feature]).batch(1_000_000)))
-    cont_bucket = np.linspace(
-    cont.min(), cont.max(), num=1000
-    )
-    vocabularies[feature] = [cont, cont_bucket]
-
-feature_dict = {
-    'str_features': ['article_id', 'device_id', 'section', 'location'],
-    'int_features': ['day_of_week'],
-    'text_features': ['title'],
-    'cont_features': ['time', 'release_date'],
-    'disc_features': ['time', 'release_date']
-}
 
 class DCN(tfrs.Model):
 
-    def __init__(self, feature_dict: dict, use_cross_layer: bool, n_cross_layers: int, deep_layer_size: list, projection_dim=None):
+    def __init__(self, feature_dict: dict, use_cross_layer: bool, n_cross_layers: int, deep_layer_size: list, vocabularies: dict, projection_dim=None):
         super().__init__()
         self.n_cross_layers = n_cross_layers
 
@@ -177,27 +121,3 @@ class DCN(tfrs.Model):
             labels=labels,
             predictions=scores
         )
-
-
-cached_train = train.shuffle(n_inter).batch(128).cache()
-cached_test = test.shuffle(n_inter).batch(64).cache()
-
-model = DCN(
-    feature_dict = feature_dict, 
-    use_cross_layer=True, 
-    n_cross_layers=2,
-    deep_layer_size=[64, 32]
-    )
-
-model.compile(optimizer=tf.keras.optimizers.Adagrad(learning_rate=0.1))
-
-logdir="logs/fit/" + str(time.time())
-tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=logdir)
-
-model.fit(cached_train,
- epochs=3,
- callbacks=[tensorboard_callback])
-
-model.evaluate(cached_test, return_dict=True)
-
-tf.saved_model.save(model, 'tfserving/models/DCN/{}'.format(int(time.time())))
