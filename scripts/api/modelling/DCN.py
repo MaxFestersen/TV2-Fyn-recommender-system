@@ -1,7 +1,7 @@
 import tensorflow as tf
 import tensorflow_recommenders as tfrs
 from tensorflow.keras import Sequential
-from tensorflow.keras.layers import StringLookup, IntegerLookup, Embedding, Dense, Discretization, Normalization, TextVectorization, GlobalAveragePooling1D
+from tensorflow.keras.layers import StringLookup, IntegerLookup, Embedding, Dense, Discretization, Normalization, TextVectorization, GlobalAveragePooling1D, GRU
 
 class DCN(tfrs.Model):
 
@@ -17,8 +17,9 @@ class DCN(tfrs.Model):
         self.text_features = feature_dict.get('text_features')
         self.cont_features = feature_dict.get('cont_features')
         self.disc_features = feature_dict.get('disc_features')
+        self.seq_features = feature_dict.get('seq_features')
         
-        self._all_features = self.str_features + self.int_features + self.text_features + self.disc_features
+        self._all_features = self.str_features + self.int_features + self.text_features + self.disc_features + self.seq_features
         self._embeddings = {}
         self._embeddings_cont = {}
 
@@ -71,6 +72,16 @@ class DCN(tfrs.Model):
                 Discretization(vocab.tolist()),
                 Embedding(len(vocab) + 1, self.embedding_dimension)
             ], name=feature)
+        
+        for feature in self.seq_features:
+            vocab = vocabularies[feature]
+            self._embeddings[feature] = Sequential([
+                StringLookup(
+                    vocabulary=vocab, mask_token=None),
+                Embedding(len(vocab) + 1, self.embedding_dimension),
+                GRU(self.embedding_dimension),
+            ], name=feature)
+
         
         if use_cross_layer:
             self._cross_layer = tfrs.layers.dcn.Cross(
