@@ -48,6 +48,14 @@ train = tf.data.Dataset.from_tensor_slices(train.to_dict('list'))
 test = tf.data.Dataset.from_tensor_slices(test.to_dict('list'))
 val = tf.data.Dataset.from_tensor_slices(val.to_dict('list'))
 
+train = train.map(lambda x: {
+    'section': x['section'],
+    'location': x['location'],
+    'article_id': x['article_id'],
+    'device_id': x['device_id'],
+    'context_id': x['context_id'],
+    'affinity': x['affinity']
+})
 
 # Creating vocabularies for embeddings
 cat_features = ['day_of_week', 'article_id', 'device_id', 'title', 'section', 'location']
