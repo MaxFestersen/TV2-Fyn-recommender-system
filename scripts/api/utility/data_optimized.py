@@ -525,14 +525,16 @@ class User(CookieDatabase):
         return df
     
     def antiInteractions(self):
-        stmt = f"""SELECT DAYOFWEEK(CURDATE()), TIME_TO_SEC(CURTIME()), articleID, title, section, location, UNIX_TIMESTAMP(releaseDate), avgSent
+        stmt = f"""SELECT articleID, section, location
                     FROM articles
-                    WHERE articleID NOT IN (SELECT articleID FROM sessionInfo
+                    WHERE releaseDate BETWEEN DATE_SUB(NOW(), INTERVAL 14 DAY) AND NOW() AND articleID NOT IN (SELECT articleID FROM sessionInfo
                                             INNER JOIN session
                                                 ON session.sessionID=sessionInfo.sessionID
                                                 WHERE session.deviceID="{self.deviceID}");"""
-        df = self.getTable(stmt, columns=['day_of_week', 'time', 'article_id', 'title', 'section', 'location', 'release_date', 'avg_sentiment'])
+        df = self.getTable(stmt, columns=['article_id', 'section', 'location'])
         df = df.dropna().reset_index(drop=True)
+        history = self.articleIDs()
+        df['context_id'] = [history for x in range(len(df.index))]
         df['device_id'] = self.deviceID
         return df
     
