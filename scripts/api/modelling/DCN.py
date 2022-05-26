@@ -1,7 +1,8 @@
 import tensorflow as tf
 import tensorflow_recommenders as tfrs
-from tensorflow.keras import Sequential
+from tensorflow.keras import Sequential, regularizers
 from tensorflow.keras.layers import StringLookup, IntegerLookup, Embedding, Dense, Discretization, Normalization, TextVectorization, GlobalAveragePooling1D, GRU
+
 
 class DCN(tfrs.Model):
 
@@ -77,7 +78,7 @@ class DCN(tfrs.Model):
             vocab = vocabularies[feature]
             self._embeddings[feature] = Sequential([
                 StringLookup(
-                    vocabulary=vocab, mask_token=None),
+                    vocabulary=vocab, mask_token=''),
                 Embedding(len(vocab) + 1, self.embedding_dimension),
                 GRU(self.embedding_dimension),
             ], name=feature)
@@ -91,7 +92,9 @@ class DCN(tfrs.Model):
         else:
             self._cross_layer = None
         
-        self._deep_layers = [Dense(layer_size, activation='relu') for layer_size in deep_layer_size]
+        self._deep_layers = [Dense(layer_size, activation='relu', kernel_regularizer=regularizers.L1L2(l1=1e-3, l2=1e-2), \
+                bias_regularizer=regularizers.L2(1e-3), \
+                activity_regularizer=regularizers.L2(1e-4)) for layer_size in deep_layer_size]
         
         self._logit_layer = Dense(1)
 
