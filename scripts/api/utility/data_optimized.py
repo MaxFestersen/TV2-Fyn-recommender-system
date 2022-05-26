@@ -534,7 +534,10 @@ class User(CookieDatabase):
         df = self.getTable(stmt, columns=['article_id', 'section', 'location'])
         df = df.dropna().reset_index(drop=True)
         history = self.articleIDs()
-        df['context_id'] = [history for x in range(len(df.index))]
+        if history:
+            df['context_id'] = [history for x in range(len(df.index))]
+        else:
+            df['context_id'] = [[''] for x in range(len(df.index))]
         df['device_id'] = self.deviceID
         return df
     
