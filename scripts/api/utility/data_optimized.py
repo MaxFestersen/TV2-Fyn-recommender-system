@@ -479,7 +479,7 @@ class User(CookieDatabase):
         stmt = f'SELECT sessionID FROM session WHERE deviceID="{self.deviceID}";'
         return self.getList(stmt)
 
-    def articleIDs(self):
+    def articleIDs(self, rng:int=7):
         '''
             articleIDs:
                 description: gets articleID's across all of a users sessions from cookie database
@@ -491,7 +491,7 @@ class User(CookieDatabase):
                     - articleIDs: list of strings
         '''
         stmt = f"""SELECT articleID FROM sessionInfo 
-        WHERE sessionID IN 
+        WHERE date BETWEEN DATE_SUB(NOW(), INTERVAL {rng} DAY) AND NOW() AND sessionID IN 
         (SELECT sessionID FROM session WHERE deviceID="{self.deviceID}")
         AND articleID NOT IN {self.notArticles};"""
         return self.getList(stmt)
