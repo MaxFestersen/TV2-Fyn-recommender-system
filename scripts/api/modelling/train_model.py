@@ -7,14 +7,19 @@ from sklearn.model_selection import train_test_split
 import time
 import matplotlib.pyplot as plt
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+from datetime import datetime
+from utility.data_optimized import allUsers
 
 os.environ['TF_XLA_FLAGS'] = '--tf_xla_cpu_global_jit'
 
 # Loading data
-interactions = pd.read_csv('database_contents.csv', index_col=False).iloc[:, 1:].dropna()
+# interactions = pd.read_csv('database_contents.csv', index_col=False).iloc[:, 1:].dropna()
+
+interactions = allUsers().interactions().dropna()
 
 # Creating column context_id containing list of previously visited article_ids
-interactions['context_id'] = interactions.sort_values('date').groupby('device_id')['article_id'].apply(lambda x: (x + ' ').cumsum().str.strip())
+interactions['week_n'] = interactions['date'].apply(lambda x: datetime.fromtimestamp(x).isocalendar().week)
+interactions['context_id'] = interactions.sort_values('date').groupby(['device_id', 'week_n'])['article_id'].apply(lambda x: (x + ' ').cumsum().str.strip())
 interactions['context_id'] = interactions['context_id'].apply(lambda x: list(x.split(' ')))
 [lid.remove(id) for lid,id in zip(interactions.context_id, interactions.article_id) if id in lid]
 n = max(interactions['context_id'].apply(len))

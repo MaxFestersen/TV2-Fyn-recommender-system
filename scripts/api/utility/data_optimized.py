@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # Libraries
@@ -437,8 +436,7 @@ class allUsers(CookieDatabase):
                         - affinity
         '''
         self.updateArticles()
-        stmt = f"""SELECT DAYOFWEEK(sessionInfo.date), TIME_TO_SEC(sessionInfo.date), UNIX_TIMESTAMP(sessionInfo.date),
-                    session.deviceID, sessionInfo.articleID, articles.title, articles.section, articles.location, UNIX_TIMESTAMP(articles.releaseDate), articles.avgSent,
+        stmt = f"""SELECT UNIX_TIMESTAMP(sessionInfo.date), session.deviceID, sessionInfo.articleID, articles.section, articles.location, 
                     (TIME_TO_SEC(sessionInfo.elapsed)*(sessionInfo.scrollY+1))/(articles.length) AS affinity
                     FROM sessionInfo
                     INNER JOIN session
@@ -446,7 +444,7 @@ class allUsers(CookieDatabase):
                     INNER JOIN articles
                         ON sessionInfo.articleID=articles.articleID
                     WHERE sessionInfo.articleID NOT IN {self.notArticles};"""
-        df = self.getTable(stmt, columns=['day_of_week', 'time', 'date', 'device_id', 'article_id', 'title', 'section', 'location', 'release_date', 'avg_sentiment', 'affinity'])
+        df = self.getTable(stmt, columns=['date', 'device_id', 'article_id', 'section', 'location', 'affinity'])
         df = df.dropna().reset_index(drop=True)
         df.affinity = df.affinity.astype(float32)
         return df

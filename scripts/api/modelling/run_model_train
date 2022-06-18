@@ -1,0 +1,4 @@
+# Cron script for updating data
+* 23 * * * python -m "/usr/local/src/scripts/train_model.py"
+# New line needed
+
